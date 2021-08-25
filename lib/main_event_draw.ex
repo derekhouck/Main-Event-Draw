@@ -4,7 +4,11 @@ defmodule MainEventDraw do
   end
 
   def draw_hand(deck) do
-    IO.puts("Hand: #{Enum.join(deck, ", ")}")
+    IO.puts("Hand: #{join_cards(deck)}")
+  end
+
+  def join_cards(cards) do
+    Enum.join(cards, ", ")
   end
 
   def start_game do
