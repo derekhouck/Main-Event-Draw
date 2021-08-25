@@ -3,6 +3,10 @@ defmodule MainEventDraw do
     Enum.map(0..4, fn x -> "Add 1 influence" end)
   end
 
+  def draw_hand(deck) do
+    IO.puts("Hand: #{Enum.join(deck, ", ")}")
+  end
+
   def start_game do
     IO.puts("Welcome to MAIN EVENT DRAAAAAAW!")
     deck = create_starter_deck()
@@ -11,11 +15,10 @@ defmodule MainEventDraw do
 
   def start_match(deck) do
     IO.puts("Our first match is Katana Jazz vs Ruby Dynamite")
-    IO.puts("Starting deck: #{Enum.join(deck, ", ")}")
-    start_turn()
+    start_turn(deck)
   end
 
-  def start_turn do
-    IO.puts("This is the start of a turn")
+  def start_turn(deck) do
+    draw_hand(deck)
   end
 end
