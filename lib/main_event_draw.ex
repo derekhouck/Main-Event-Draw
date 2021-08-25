@@ -4,14 +4,27 @@ defmodule MainEventDraw do
   end
 
   def draw_card(deck) do
-    %{card: Enum.take(deck, 1), deck: Enum.drop(deck, 1)}
+    Enum.split(deck, 1)
   end
 
-  # TODO: Draw 5 cards
-  def draw_hand(deck) do
-    state = draw_card(deck)
-    IO.puts("Hand: #{state.card}")
-    IO.puts("Deck: #{join_cards(state.deck)}")
+  def draw_card_and_add_to_hand(deck, hand) do
+    { card, deck } = draw_card(deck)
+    { deck, [ card | hand ] }
+  end
+
+  def deal_hand(deck) do
+    { deck, hand } = draw_card_and_add_to_hand(deck, [])
+    deal_hand(deck, hand, 4)
+  end
+  
+  def deal_hand(deck, hand, cards_left_to_draw) when cards_left_to_draw == 0 do
+    IO.puts("Hand: #{join_cards(hand)}")
+    IO.puts("Deck: #{Enum.count(deck)} cards")
+  end
+
+  def deal_hand(deck, hand, cards_left_to_draw) do
+    { deck, hand } = draw_card_and_add_to_hand(deck, hand)
+    deal_hand(deck, hand, cards_left_to_draw - 1) 
   end
 
   def join_cards(cards) do
@@ -30,6 +43,6 @@ defmodule MainEventDraw do
   end
 
   def start_turn(deck) do
-    draw_hand(deck)
+    deal_hand(deck)
   end
 end
