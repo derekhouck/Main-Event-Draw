@@ -1,18 +1,5 @@
 defmodule MainEventDraw do
-  @moduledoc """
-  Documentation for `MainEventDraw`.
-  """
-
-  @doc """
-  Hello world.
-
-  ## Examples
-
-      iex> MainEventDraw.hello()
-      :world
-
-  """
-  def hello do
-    :world
+  def start_game do
+    "Welcome to MAIN EVENT DRAAAAAAW!"
   end
 end
