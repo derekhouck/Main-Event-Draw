@@ -1,6 +1,6 @@
 defmodule MainEventDraw do
   def create_starter_deck do
-    Enum.map(0..9, fn x -> "Add 1 influence" end)
+    Enum.map(0..9, fn _x -> "Add 1 to confidence" end)
   end
 
   def draw_card(deck) do
@@ -18,8 +18,7 @@ defmodule MainEventDraw do
   end
   
   def deal_hand(deck, hand, cards_left_to_draw) when cards_left_to_draw == 0 do
-    IO.puts("Hand: #{join_cards(hand)}")
-    IO.puts("Deck: #{Enum.count(deck)} cards")
+    { deck, hand }
   end
 
   def deal_hand(deck, hand, cards_left_to_draw) do
@@ -29,6 +28,12 @@ defmodule MainEventDraw do
 
   def join_cards(cards) do
     Enum.join(cards, ", ")
+  end
+
+  def report_current_state(state) do
+    IO.puts("Hand: #{join_cards(state.hand)}")
+    IO.puts("Deck: #{Enum.count(state.deck)} cards") 
+    IO.puts("Confidence: #{state.confidence}")
   end
 
   def start_game do
@@ -43,6 +48,8 @@ defmodule MainEventDraw do
   end
 
   def start_turn(deck) do
-    deal_hand(deck)
+    { deck, hand } = deal_hand(deck)
+    state = %{deck: deck, hand: hand, confidence: 0}
+    report_current_state(state)
   end
 end
