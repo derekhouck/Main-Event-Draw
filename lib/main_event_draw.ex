@@ -1,10 +1,17 @@
 defmodule MainEventDraw do
   def create_starter_deck do
-    Enum.map(0..4, fn x -> "Add 1 influence" end)
+    Enum.map(0..9, fn x -> "Add 1 influence" end)
   end
 
+  def draw_card(deck) do
+    %{card: Enum.take(deck, 1), deck: Enum.drop(deck, 1)}
+  end
+
+  # TODO: Draw 5 cards
   def draw_hand(deck) do
-    IO.puts("Hand: #{join_cards(deck)}")
+    state = draw_card(deck)
+    IO.puts("Hand: #{state.card}")
+    IO.puts("Deck: #{join_cards(state.deck)}")
   end
 
   def join_cards(cards) do
