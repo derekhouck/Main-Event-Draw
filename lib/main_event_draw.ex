@@ -12,5 +12,10 @@ defmodule MainEventDraw do
   def start_match(deck) do
     IO.puts("Our first match is Katana Jazz vs Ruby Dynamite")
     IO.puts("Starting deck: #{Enum.join(deck, ", ")}")
+    start_turn()
+  end
+
+  def start_turn do
+    IO.puts("This is the start of a turn")
   end
 end
