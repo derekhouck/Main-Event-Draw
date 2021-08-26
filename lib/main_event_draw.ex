@@ -34,17 +34,17 @@ defmodule MainEventDraw do
   @doc """
     Deals a hand of cards to the player from the deck.
   """
-  def deal_hand(deck, hand \\ [], cards_left_to_draw \\ 5)
+  def deal_hand(deck, cards_left_to_draw \\ 5, hand \\ [])
 
-  def deal_hand(deck, hand, cards_left_to_draw) when cards_left_to_draw == 0 do
+  def deal_hand(deck, cards_left_to_draw, hand) when cards_left_to_draw == 0 do
     { deck, hand }
   end
 
-  def deal_hand(deck, hand, cards_left_to_draw) do
+  def deal_hand(deck, cards_left_to_draw, hand) do
     { [ card ], deck } = draw_card(deck)
     hand = add_card_to_hand(card, hand)
 
-    deal_hand(deck, hand, cards_left_to_draw - 1) 
+    deal_hand(deck, cards_left_to_draw - 1, hand) 
   end
 
   @doc """
@@ -79,9 +79,18 @@ defmodule MainEventDraw do
     IO.puts("Deck: #{Enum.count(state.deck)} cards") 
     IO.puts("Discard: #{Enum.count(state.discard)} cards")
     IO.puts("Confidence: #{state.confidence}")
-    IO.puts("Gimmicks available: #{Enum.count(state.gimmicks)}")
+    IO.puts("Gimmicks available: #{join_cards(state.gimmicks_available)}")
+    IO.puts("Gimmicks deck: #{Enum.count(state.gimmicks)}")
     IO.puts("---")
     state
+  end
+
+  @doc """
+    Reveals a number of gimmicks so they can be acquired.
+  """
+  def reveal_gimmicks(state) do
+    { gimmicks, gimmicks_available } = deal_hand(state.gimmicks, 6)
+    %{ state | gimmicks: gimmicks, gimmicks_available: gimmicks_available }
   end
 
   @doc """
@@ -91,12 +100,14 @@ defmodule MainEventDraw do
     IO.puts("Welcome to MAIN EVENT DRAAAAAAW!")
 
     %{
+      confidence: 0,
       deck: create_starter_deck(),
       discard: [],
       gimmicks: create_gimmick_deck(),
-      hand: [],
-      confidence: 0
+      gimmicks_available: [],
+      hand: []
     }
+    |> reveal_gimmicks
     |> start_match
   end
 
