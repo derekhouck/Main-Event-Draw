@@ -5,6 +5,12 @@ defmodule MainEventDraw do
 
   @doc """
     Adds a card to the player's hand.
+
+  ## Examples
+
+      iex> MainEventDraw.add_card_to_hand("Example card", [])
+      ["Example card"]
+
   """
   def add_card_to_hand(card, hand) do
     [ card | hand ]
@@ -12,6 +18,15 @@ defmodule MainEventDraw do
 
   @doc """
     Creates the starting deck of cards for the player.
+
+  ## Examples
+
+      iex> MainEventDraw.create_starter_deck
+      ["Add 1 to confidence", "Add 1 to confidence", "Add 1 to confidence",
+      "Add 1 to confidence", "Add 1 to confidence", "Add 1 to confidence",
+      "Add 1 to confidence", "Add 1 to confidence", "Add 1 to confidence",
+      "Add 1 to confidence"]
+
   """
   def create_starter_deck do
     Enum.map(0..9, fn _x -> "Add 1 to confidence" end)
@@ -19,6 +34,15 @@ defmodule MainEventDraw do
 
   @doc """
     Creates the gimmick deck of cards that can be acquired using `confidence`.
+  
+  ## Examples
+
+      iex> MainEventDraw.create_gimmick_deck
+      ["Add 1 to excitement", "Add 1 to excitement", "Add 1 to excitement",
+      "Add 1 to excitement", "Add 1 to excitement", "Add 1 to excitement",
+      "Add 1 to excitement", "Add 1 to excitement", "Add 1 to excitement",
+      "Add 1 to excitement"]
+
   """
   def create_gimmick_deck do
     Enum.map(0..9, fn _x -> "Add 1 to excitement" end)
@@ -26,6 +50,16 @@ defmodule MainEventDraw do
 
   @doc """
     Draws a card from the deck. Returns a tuple containing two lists: the card drawn and the remainder of the deck.
+  
+  ## Examples
+
+      iex> deck = MainEventDraw.create_starter_deck
+      iex> MainEventDraw.draw_card(deck)
+      {["Add 1 to confidence"],
+      ["Add 1 to confidence", "Add 1 to confidence", "Add 1 to confidence",
+        "Add 1 to confidence", "Add 1 to confidence", "Add 1 to confidence",
+        "Add 1 to confidence", "Add 1 to confidence", "Add 1 to confidence"]}
+
   """
   def draw_card(deck) do
     Enum.split(deck, 1)
@@ -33,6 +67,16 @@ defmodule MainEventDraw do
 
   @doc """
     Deals a hand of cards to the player from the deck.
+
+  ## Examples
+
+      iex> deck = MainEventDraw.create_starter_deck
+      iex> MainEventDraw.deal_hand(deck)
+      {["Add 1 to confidence", "Add 1 to confidence", "Add 1 to confidence",
+      "Add 1 to confidence", "Add 1 to confidence"],
+      ["Add 1 to confidence", "Add 1 to confidence", "Add 1 to confidence",
+      "Add 1 to confidence", "Add 1 to confidence"]}
+
   """
   def deal_hand(deck, cards_left_to_draw \\ 5, hand \\ [])
 
@@ -49,6 +93,12 @@ defmodule MainEventDraw do
 
   @doc """
     Joins a list of cards together into a comma-separated string.
+
+  ## Examples
+
+      iex> MainEventDraw.join_cards(["Card One", "Card Two"])
+      "Card One, Card Two"
+
   """
   def join_cards(cards) do
     Enum.join(cards, ", ")
