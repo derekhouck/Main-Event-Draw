@@ -13,8 +13,12 @@ defmodule MainEventDraw do
   end
 
   def deal_hand(deck) do
-    { deck, hand } = draw_card_and_add_to_hand(deck, [])
-    deal_hand(deck, hand, 4)
+    case Enum.count(deck) do
+      n when n >= 5 ->
+        deal_hand(deck, [], 5)
+      n when n < 5 ->
+        deal_hand(deck, [], n)
+    end
   end
   
   def deal_hand(deck, hand, cards_left_to_draw) when cards_left_to_draw == 0 do
@@ -31,7 +35,7 @@ defmodule MainEventDraw do
   end
 
   def play_card(state) when length(state.hand) == 0 do
-    nil
+    start_turn(state)
   end
 
   def play_card(state) do
@@ -59,17 +63,24 @@ defmodule MainEventDraw do
 
   def start_match(deck) do
     IO.puts("Our first match is Katana Jazz vs Ruby Dynamite")
-    start_turn(deck)
-  end
 
-  def start_turn(deck) do
-    { deck, hand } = deal_hand(deck)
     state = %{
       deck: deck,
       discard: [],
-      hand: hand,
+      hand: [],
       confidence: 0
     }
+
+    start_turn(state)
+  end
+
+  def start_turn(state) when length(state.deck) == 0 do
+    IO.puts("No more cards left to draw.")
+  end
+
+  def start_turn(state) do
+    { deck, hand } = deal_hand(state.deck)
+    state = %{ state | confidence: 0, deck: deck, hand: hand }
     report_current_state(state)
     play_card(state)
   end
