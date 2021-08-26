@@ -1,4 +1,8 @@
 defmodule MainEventDraw do
+  @moduledoc """
+    Provides methods for creating and running a game of Main Event Draw
+  """
+
   def create_starter_deck do
     Enum.map(0..9, fn _x -> "Add 1 to confidence" end)
   end
@@ -16,15 +20,8 @@ defmodule MainEventDraw do
     { deck, [ card | hand ] }
   end
 
-  def deal_hand(deck) do
-    case Enum.count(deck) do
-      n when n >= 5 ->
-        deal_hand(deck, [], 5)
-      n when n < 5 ->
-        deal_hand(deck, [], n)
-    end
-  end
-  
+  def deal_hand(deck, hand \\ [], cards_left_to_draw \\ 5)
+
   def deal_hand(deck, hand, cards_left_to_draw) when cards_left_to_draw == 0 do
     { deck, hand }
   end
