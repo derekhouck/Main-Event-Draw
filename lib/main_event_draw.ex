@@ -30,9 +30,15 @@ defmodule MainEventDraw do
     Enum.join(cards, ", ")
   end
 
+  def play_card(state) do
+    { card, hand } = Enum.split(state.hand, 1)
+    %{ state | confidence: state.confidence + 1, hand: hand, discard: [ card | state.discard ] }
+  end
+
   def report_current_state(state) do
     IO.puts("Hand: #{join_cards(state.hand)}")
     IO.puts("Deck: #{Enum.count(state.deck)} cards") 
+    IO.puts("Discard: #{Enum.count(state.discard)} cards")
     IO.puts("Confidence: #{state.confidence}")
   end
 
@@ -49,7 +55,14 @@ defmodule MainEventDraw do
 
   def start_turn(deck) do
     { deck, hand } = deal_hand(deck)
-    state = %{deck: deck, hand: hand, confidence: 0}
+    state = %{
+      deck: deck,
+      discard: [],
+      hand: hand,
+      confidence: 0
+    }
+    report_current_state(state)
+    state = play_card(state)
     report_current_state(state)
   end
 end
