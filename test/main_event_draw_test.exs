@@ -1,4 +1,36 @@
 defmodule MainEventDrawTest do
   use ExUnit.Case
   doctest MainEventDraw
+
+  test "acquire_gimmicks returns state" do
+    state = %{ gimmicks: [] }
+    assert MainEventDraw.acquire_gimmicks(state) == state
+  end
+
+  test "deal_hand deals the correct number of cards" do
+    deck = MainEventDraw.create_starter_deck
+    { _deck, hand } = MainEventDraw.deal_hand(deck, 4)
+    assert length(hand) == 4
+  end
+
+  test "join_card_descriptions requires a map with a description key" do
+    cards = ["Card One", "Card Two"]
+    assert_raise ArgumentError, fn ->
+      MainEventDraw.join_card_descriptions(cards)
+    end
+  end
+
+  test "play_card empties the player's hand and adds those cards to the discard pile" do
+    initial_state = %{hand: MainEventDraw.create_starter_deck, confidence: 0, discard: []}
+    new_state = MainEventDraw.play_card(initial_state)
+    assert length(new_state.hand) == 0
+    assert length(new_state.discard) == length(initial_state.hand)
+  end
+
+  test "reveal_gimmicks reveals 6 gimmick cards from the gimmick deck" do
+    initial_state = %{ gimmicks: MainEventDraw.create_gimmick_deck, gimmicks_available: [] }
+    new_state = MainEventDraw.reveal_gimmicks(initial_state)
+    assert length(new_state.gimmicks) == length(initial_state.gimmicks) - 6
+    assert length(new_state.gimmicks_available) == 6
+  end
 end

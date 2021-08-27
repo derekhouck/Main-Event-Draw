@@ -4,6 +4,13 @@ defmodule MainEventDraw do
   """
 
   @doc """
+    Acquires gimmicks using `confidence`
+  """
+  def acquire_gimmicks(state) do
+    state
+  end
+
+  @doc """
     Adds a card to the player's hand.
 
   ## Examples
@@ -22,14 +29,38 @@ defmodule MainEventDraw do
   ## Examples
 
       iex> MainEventDraw.create_starter_deck
-      ["Add 1 to confidence", "Add 1 to confidence", "Add 1 to confidence",
-      "Add 1 to confidence", "Add 1 to confidence", "Add 1 to confidence",
-      "Add 1 to confidence", "Add 1 to confidence", "Add 1 to confidence",
-      "Add 1 to confidence"]
+      [
+        %{description: "Add 1 to confidence"},
+        %{description: "Add 1 to confidence"},
+        %{description: "Add 1 to confidence"},
+        %{description: "Add 1 to confidence"},
+        %{description: "Add 1 to confidence"},
+        %{description: "Add 1 to confidence"},
+        %{description: "Add 1 to confidence"},
+        %{description: "Add 1 to confidence"}, 
+        %{description: "Add 1 to confidence"},
+        %{description: "Add 1 to confidence"}
+      ]
 
   """
   def create_starter_deck do
-    Enum.map(0..9, fn _x -> "Add 1 to confidence" end)
+    Enum.map(0..9, fn _x -> %{ description: "Add 1 to confidence" } end)
+  end
+
+  @doc """
+    Creates a gimmick card with a confidence cost and a description.
+
+  ## Examples
+
+      iex(80)> MainEventDraw.create_gimmick_card
+      %{confidence_needed: 3, description: "Add 1 to excitement"}
+
+  """
+  def create_gimmick_card do
+    %{
+      confidence_needed: 3,
+      description: "Add 1 to excitement"
+    }
   end
 
   @doc """
@@ -38,14 +69,22 @@ defmodule MainEventDraw do
   ## Examples
 
       iex> MainEventDraw.create_gimmick_deck
-      ["Add 1 to excitement", "Add 1 to excitement", "Add 1 to excitement",
-      "Add 1 to excitement", "Add 1 to excitement", "Add 1 to excitement",
-      "Add 1 to excitement", "Add 1 to excitement", "Add 1 to excitement",
-      "Add 1 to excitement"]
+      [
+        %{confidence_needed: 3, description: "Add 1 to excitement"}, 
+        %{confidence_needed: 3, description: "Add 1 to excitement"},
+        %{confidence_needed: 3, description: "Add 1 to excitement"},
+        %{confidence_needed: 3, description: "Add 1 to excitement"},
+        %{confidence_needed: 3, description: "Add 1 to excitement"},
+        %{confidence_needed: 3, description: "Add 1 to excitement"},
+        %{confidence_needed: 3, description: "Add 1 to excitement"},
+        %{confidence_needed: 3, description: "Add 1 to excitement"},
+        %{confidence_needed: 3, description: "Add 1 to excitement"},
+        %{confidence_needed: 3, description: "Add 1 to excitement"}
+      ]
 
   """
   def create_gimmick_deck do
-    Enum.map(0..9, fn _x -> "Add 1 to excitement" end)
+    Enum.map(0..9, fn _x -> create_gimmick_card() end)
   end
 
   @doc """
@@ -55,10 +94,18 @@ defmodule MainEventDraw do
 
       iex> deck = MainEventDraw.create_starter_deck
       iex> MainEventDraw.draw_card(deck)
-      {["Add 1 to confidence"],
-      ["Add 1 to confidence", "Add 1 to confidence", "Add 1 to confidence",
-        "Add 1 to confidence", "Add 1 to confidence", "Add 1 to confidence",
-        "Add 1 to confidence", "Add 1 to confidence", "Add 1 to confidence"]}
+      {[%{description: "Add 1 to confidence"}],
+      [
+        %{description: "Add 1 to confidence"},
+        %{description: "Add 1 to confidence"},
+        %{description: "Add 1 to confidence"},
+        %{description: "Add 1 to confidence"},
+        %{description: "Add 1 to confidence"},
+        %{description: "Add 1 to confidence"},
+        %{description: "Add 1 to confidence"},
+        %{description: "Add 1 to confidence"},
+        %{description: "Add 1 to confidence"}
+      ]}
 
   """
   def draw_card(deck) do
@@ -72,10 +119,20 @@ defmodule MainEventDraw do
 
       iex> deck = MainEventDraw.create_starter_deck
       iex> MainEventDraw.deal_hand(deck)
-      {["Add 1 to confidence", "Add 1 to confidence", "Add 1 to confidence",
-      "Add 1 to confidence", "Add 1 to confidence"],
-      ["Add 1 to confidence", "Add 1 to confidence", "Add 1 to confidence",
-      "Add 1 to confidence", "Add 1 to confidence"]}
+      {[
+        %{description: "Add 1 to confidence"},
+        %{description: "Add 1 to confidence"},
+        %{description: "Add 1 to confidence"},
+        %{description: "Add 1 to confidence"},
+        %{description: "Add 1 to confidence"}
+      ],
+      [
+        %{description: "Add 1 to confidence"},
+        %{description: "Add 1 to confidence"},
+        %{description: "Add 1 to confidence"},
+        %{description: "Add 1 to confidence"},
+        %{description: "Add 1 to confidence"}
+      ]}
 
   """
   def deal_hand(deck, cards_left_to_draw \\ 5, hand \\ [])
@@ -96,27 +153,28 @@ defmodule MainEventDraw do
 
   ## Examples
 
-      iex> MainEventDraw.join_cards(["Card One", "Card Two"])
-      "Card One, Card Two"
+      iex> deck = MainEventDraw.create_starter_deck
+      iex> MainEventDraw.join_card_descriptions(deck)
+      "Add 1 to confidence, Add 1 to confidence, Add 1 to confidence, Add 1 to confidence, Add 1 to confidence, Add 1 to confidence, Add 1 to confidence, Add 1 to confidence, Add 1 to confidence, Add 1 to confidence"
 
   """
-  def join_cards(cards) do
-    Enum.join(cards, ", ")
+  def join_card_descriptions(cards) do
+    Enum.map(cards, fn card -> card.description end)
+    |> Enum.join(", ")
   end
 
   @doc """
-    Plays a card, removing it from the player's hand and increasing `confidence` by 1.
+    Plays a card, removing it from the player's hand and increasing `confidence` by 1. Will run recursively until there are no more cards in the player's hand.
   """
   def play_card(state) when length(state.hand) == 0 do
-    start_turn(state)
+    state
   end
 
   def play_card(state) do
     { [ card ], hand } = Enum.split(state.hand, 1)
-    IO.puts("Playing #{card}")
+    IO.puts("Playing #{card.description}")
 
     %{ state | confidence: state.confidence + 1, hand: hand, discard: [ card | state.discard ] }
-    |> report_current_state
     |> play_card
   end
 
@@ -125,11 +183,11 @@ defmodule MainEventDraw do
   """
   def report_current_state(state) do
     IO.puts("---")
-    IO.puts("Hand: #{join_cards(state.hand)}")
+    IO.puts("Hand: #{join_card_descriptions(state.hand)}")
     IO.puts("Deck: #{Enum.count(state.deck)} cards") 
     IO.puts("Discard: #{Enum.count(state.discard)} cards")
     IO.puts("Confidence: #{state.confidence}")
-    IO.puts("Gimmicks available: #{join_cards(state.gimmicks_available)}")
+    IO.puts("Gimmicks available: #{join_card_descriptions(state.gimmicks_available)}")
     IO.puts("Gimmicks deck: #{Enum.count(state.gimmicks)}")
     IO.puts("---")
     state
@@ -182,5 +240,7 @@ defmodule MainEventDraw do
     %{ state | confidence: 0, deck: deck, hand: hand }
     |> report_current_state
     |> play_card
+    |> acquire_gimmicks
+    |> start_turn
   end
 end
