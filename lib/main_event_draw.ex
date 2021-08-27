@@ -25,6 +25,18 @@ defmodule MainEventDraw do
   end
 
   @doc """
+    Checks the current excitement level against the excitement level needed to win the match.
+  """
+  def check_excitement(current_state) do
+    case current_state.excitement >= current_state.excitement_needed do
+      true -> 
+        IO.puts("The match is over! Congratulations!")
+        %{ current_state | deck: [], hand: [], discard: Enum.concat([current_state.deck, current_state.hand, current_state.discard])}
+      false -> current_state
+    end
+  end
+
+  @doc """
     Creates a card based off of the type provided.
   
   ## Examples
@@ -139,7 +151,8 @@ defmodule MainEventDraw do
     { [ card ], hand } = draw_card(state.hand)
     IO.puts("Playing #{card.description}")
 
-    %{ state | confidence: state.confidence + 1, hand: hand, discard: [ card | state.discard ] }
+    %{ state | confidence: state.confidence + card.confidence, excitement: state.excitement + card.excitement, hand: hand, discard: [ card | state.discard ] }
+    |> check_excitement
     |> play_card
   end
 
@@ -151,6 +164,7 @@ defmodule MainEventDraw do
     IO.puts("Hand: #{join_card_descriptions(state.hand)}")
     IO.puts("Deck: #{Enum.count(state.deck)} cards") 
     IO.puts("Discard: #{Enum.count(state.discard)} cards")
+    IO.puts("Excitement: #{state.excitement}")
     IO.puts("Confidence: #{state.confidence}")
     IO.puts("Gimmicks available: #{join_card_descriptions(state.gimmicks_available)}")
     IO.puts("Gimmicks deck: #{Enum.count(state.gimmicks)}")
@@ -176,6 +190,8 @@ defmodule MainEventDraw do
       confidence: 0,
       deck: create_starter_deck(),
       discard: [],
+      excitement: 0,
+      excitement_needed: 10,
       gimmicks: create_gimmick_deck(),
       gimmicks_available: [],
       hand: []

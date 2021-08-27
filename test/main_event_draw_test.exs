@@ -33,7 +33,7 @@ defmodule MainEventDrawTest do
   end
 
   test "play_card empties the player's hand and adds those cards to the discard pile" do
-    initial_state = %{hand: MainEventDraw.create_starter_deck, confidence: 0, discard: []}
+    initial_state = %{hand: MainEventDraw.create_starter_deck, confidence: 0, discard: [], excitement: 0, excitement_needed: 10}
     new_state = MainEventDraw.play_card(initial_state)
     assert length(new_state.hand) == 0
     assert length(new_state.discard) == length(initial_state.hand)
