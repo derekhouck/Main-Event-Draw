@@ -10,6 +10,15 @@ defmodule MainEventDrawTest do
     assert length(new_state.discard) == 1
   end
 
+  test "create_card creates gimmick cards" do
+    card = MainEventDraw.create_card(:gimmick)
+    assert card.type == :gimmick
+    assert card.description == "Add 1 to excitement"
+    assert card.confidence == 0
+    assert card.excitement == 1
+    assert card.confidence_needed == 3
+  end
+
   test "deal_hand deals the correct number of cards" do
     deck = MainEventDraw.create_starter_deck
     { _deck, hand } = MainEventDraw.deal_hand(deck, 4)

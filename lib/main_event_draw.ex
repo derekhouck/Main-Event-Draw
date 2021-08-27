@@ -25,43 +25,33 @@ defmodule MainEventDraw do
   end
 
   @doc """
+    Creates a card based off of the type provided.
+  
+  ## Examples
+
+      iex> MainEventDraw.create_card(:starter)
+      %{ type: :starter, description: "Add 1 to confidence", confidence: 1, excitement: 0, confidence_needed: 0 }
+
+  """
+  def create_card(type) do
+    case type do
+      :gimmick -> %{ type: :gimmick, description: "Add 1 to excitement", confidence: 0, excitement: 1, confidence_needed: 3 }
+      :starter -> %{ type: :starter, description: "Add 1 to confidence", confidence: 1, excitement: 0, confidence_needed: 0 }
+    end
+  end
+
+  @doc """
     Creates the starting deck of cards for the player.
 
   ## Examples
 
-      iex> MainEventDraw.create_starter_deck
-      [
-        %{description: "Add 1 to confidence"},
-        %{description: "Add 1 to confidence"},
-        %{description: "Add 1 to confidence"},
-        %{description: "Add 1 to confidence"},
-        %{description: "Add 1 to confidence"},
-        %{description: "Add 1 to confidence"},
-        %{description: "Add 1 to confidence"},
-        %{description: "Add 1 to confidence"}, 
-        %{description: "Add 1 to confidence"},
-        %{description: "Add 1 to confidence"}
-      ]
+      iex> deck = MainEventDraw.create_starter_deck
+      iex> Enum.count(deck)
+      10
 
   """
   def create_starter_deck do
-    Enum.map(0..9, fn _x -> %{ description: "Add 1 to confidence" } end)
-  end
-
-  @doc """
-    Creates a gimmick card with a confidence cost and a description.
-
-  ## Examples
-
-      iex(80)> MainEventDraw.create_gimmick_card
-      %{confidence_needed: 3, description: "Add 1 to excitement"}
-
-  """
-  def create_gimmick_card do
-    %{
-      confidence_needed: 3,
-      description: "Add 1 to excitement"
-    }
+    Enum.map(0..9, fn _x -> create_card(:starter) end)
   end
 
   @doc """
@@ -69,23 +59,13 @@ defmodule MainEventDraw do
   
   ## Examples
 
-      iex> MainEventDraw.create_gimmick_deck
-      [
-        %{confidence_needed: 3, description: "Add 1 to excitement"}, 
-        %{confidence_needed: 3, description: "Add 1 to excitement"},
-        %{confidence_needed: 3, description: "Add 1 to excitement"},
-        %{confidence_needed: 3, description: "Add 1 to excitement"},
-        %{confidence_needed: 3, description: "Add 1 to excitement"},
-        %{confidence_needed: 3, description: "Add 1 to excitement"},
-        %{confidence_needed: 3, description: "Add 1 to excitement"},
-        %{confidence_needed: 3, description: "Add 1 to excitement"},
-        %{confidence_needed: 3, description: "Add 1 to excitement"},
-        %{confidence_needed: 3, description: "Add 1 to excitement"}
-      ]
+      iex> deck = MainEventDraw.create_gimmick_deck
+      iex> Enum.count(deck)
+      10
 
   """
   def create_gimmick_deck do
-    Enum.map(0..9, fn _x -> create_gimmick_card() end)
+    Enum.map(0..9, fn _x -> create_card(:gimmick) end)
   end
 
   @doc """
@@ -94,19 +74,15 @@ defmodule MainEventDraw do
   ## Examples
 
       iex> deck = MainEventDraw.create_starter_deck
-      iex> MainEventDraw.draw_card(deck)
-      {[%{description: "Add 1 to confidence"}],
-      [
-        %{description: "Add 1 to confidence"},
-        %{description: "Add 1 to confidence"},
-        %{description: "Add 1 to confidence"},
-        %{description: "Add 1 to confidence"},
-        %{description: "Add 1 to confidence"},
-        %{description: "Add 1 to confidence"},
-        %{description: "Add 1 to confidence"},
-        %{description: "Add 1 to confidence"},
-        %{description: "Add 1 to confidence"}
-      ]}
+      iex> { [ card ], _remaining_deck } = MainEventDraw.draw_card(deck)
+      iex> card
+      %{
+        description: "Add 1 to confidence",
+        confidence: 1,
+        excitement: 0,
+        type: :starter,
+        confidence_needed: 0
+      }
 
   """
   def draw_card(deck) do
@@ -119,21 +95,9 @@ defmodule MainEventDraw do
   ## Examples
 
       iex> deck = MainEventDraw.create_starter_deck
-      iex> MainEventDraw.deal_hand(deck)
-      {[
-        %{description: "Add 1 to confidence"},
-        %{description: "Add 1 to confidence"},
-        %{description: "Add 1 to confidence"},
-        %{description: "Add 1 to confidence"},
-        %{description: "Add 1 to confidence"}
-      ],
-      [
-        %{description: "Add 1 to confidence"},
-        %{description: "Add 1 to confidence"},
-        %{description: "Add 1 to confidence"},
-        %{description: "Add 1 to confidence"},
-        %{description: "Add 1 to confidence"}
-      ]}
+      iex> { hand, _remaining_deck } = MainEventDraw.deal_hand(deck)
+      iex> Enum.count(hand)
+      5
 
   """
   def deal_hand(deck, cards_left_to_draw \\ 5, hand \\ [])
