@@ -33,6 +33,10 @@ defmodule MainEventDrawTest do
     assert length(hand) == 4
   end
 
+  test "excitement_level_reached returns false is excitment is lower than excitement_needed" do
+    assert MainEventDraw.excitement_level_reached?(9, 10) == false
+  end
+
   test "join_card_descriptions requires a map with a description key" do
     cards = ["Card One", "Card Two"]
     assert_raise ArgumentError, fn ->
@@ -40,9 +44,9 @@ defmodule MainEventDrawTest do
     end
   end
 
-  test "play_card empties the player's hand and adds those cards to the discard pile" do
+  test "play_cards empties the player's hand and adds those cards to the discard pile" do
     initial_state = %{hand: MainEventDraw.create_starter_deck, confidence: 0, discard: [], excitement: 0, excitement_needed: 10}
-    new_state = MainEventDraw.play_card(initial_state)
+    new_state = MainEventDraw.play_cards(initial_state)
     assert length(new_state.hand) == 0
     assert length(new_state.discard) == length(initial_state.hand)
   end

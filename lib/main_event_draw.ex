@@ -32,7 +32,7 @@ defmodule MainEventDraw do
     Checks the current excitement level against the excitement level needed to win the match.
   """
   def check_excitement(current_state) do
-    case current_state.excitement >= current_state.excitement_needed do
+    case excitement_level_reached?(current_state.excitement, current_state.excitement_needed) do
       true -> 
         IO.puts("The match is over! Congratulations!")
         %{ current_state | deck: [], hand: [], discard: Enum.concat([current_state.deck, current_state.hand, current_state.discard])}
@@ -130,6 +130,21 @@ defmodule MainEventDraw do
   end
 
   @doc """
+    Returns true if `excitement` is greater than or equal to `excitement_needed`.
+  
+  ## Examples
+
+      iex> excitement = 11
+      iex> excitement_needed = 10
+      iex> MainEventDraw.excitement_level_reached?(excitement, excitement_needed)
+      true
+
+  """
+  def excitement_level_reached?(excitement, excitement_needed) do
+    excitement >= excitement_needed
+  end
+
+  @doc """
     Joins a list of cards together into a comma-separated string.
 
   ## Examples
@@ -145,19 +160,19 @@ defmodule MainEventDraw do
   end
 
   @doc """
-    Plays a card, removing it from the player's hand and increasing `confidence` by 1. Will run recursively until there are no more cards in the player's hand.
+    Plays the cards in a player's hand one-by-one, removing them from the player's hand and updating state with their effects.
   """
-  def play_card(state) when length(state.hand) == 0 do
+  def play_cards(state) when length(state.hand) == 0 do
     state
   end
 
-  def play_card(state) do
+  def play_cards(state) do
     { [ card ], hand } = draw_card(state.hand)
     IO.puts("Playing #{card.description}")
 
     %{ state | confidence: state.confidence + card.confidence, excitement: state.excitement + card.excitement, hand: hand, discard: [ card | state.discard ] }
     |> check_excitement
-    |> play_card
+    |> play_cards
   end
 
   @doc """
@@ -225,7 +240,7 @@ defmodule MainEventDraw do
     { deck, hand } = deal_hand(state.deck)
     %{ state | confidence: 0, deck: deck, hand: hand }
     |> report_current_state
-    |> play_card
+    |> play_cards
     |> acquire_gimmicks
     |> start_turn
   end
