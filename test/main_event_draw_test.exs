@@ -3,19 +3,25 @@ defmodule MainEventDrawTest do
   doctest MainEventDraw
 
   test "acquire_gimmicks acquires a gimmick if it has enough confidence" do
-    initial_state = %{ gimmicks_available: MainEventDraw.create_gimmick_deck, confidence: 5, discard: [] }
+    gimmick_deck = %{ hand: MainEventDraw.create_gimmick_deck }
+    player_deck = %{ discard: [] }
+    initial_state = %{ confidence: 5, player_deck: player_deck, gimmick_deck: gimmick_deck }
     new_state = MainEventDraw.acquire_gimmicks(initial_state)
-    assert length(new_state.gimmicks_available) == length(initial_state.gimmicks_available) - 1
+
+    assert length(new_state.gimmick_deck.hand) == length(gimmick_deck.hand) - 1
     assert new_state.confidence == initial_state.confidence - 3
-    assert length(new_state.discard) == 1
+    assert length(new_state.player_deck.discard) == 1
   end
 
   test "acquire_gimmicks does not alter state if the player does not have enough confidence" do
-    initial_state = %{ gimmicks_available: MainEventDraw.create_gimmick_deck, confidence: 2, discard: [] }
+    gimmick_deck = %{ hand: MainEventDraw.create_gimmick_deck }
+    player_deck = %{ discard: [] }
+    initial_state = %{ confidence: 2, player_deck: player_deck, gimmick_deck: gimmick_deck }
     new_state = MainEventDraw.acquire_gimmicks(initial_state)
-    assert length(new_state.gimmicks_available) == length(initial_state.gimmicks_available)
+
+    assert length(new_state.gimmick_deck.hand) == length(gimmick_deck.hand)
     assert new_state.confidence == initial_state.confidence
-    assert length(new_state.discard) == 0
+    assert length(new_state.player_deck.discard) == 0
   end
 
   test "create_card creates gimmick cards" do
@@ -28,7 +34,7 @@ defmodule MainEventDrawTest do
   end
 
   test "deal_hand deals the correct number of cards" do
-    deck = MainEventDraw.create_starter_deck
+    deck = %{ draw: MainEventDraw.create_starter_deck }
     { _deck, hand } = MainEventDraw.deal_hand(deck, 4)
     assert length(hand) == 4
   end
@@ -45,16 +51,20 @@ defmodule MainEventDrawTest do
   end
 
   test "play_cards empties the player's hand and adds those cards to the discard pile" do
-    initial_state = %{hand: MainEventDraw.create_starter_deck, confidence: 0, discard: [], excitement: 0, excitement_needed: 10}
+    player_deck = %{ discard: [], hand: MainEventDraw.create_starter_deck }
+    initial_state = %{ confidence: 0, excitement: 0, excitement_needed: 10, player_deck: player_deck }
     new_state = MainEventDraw.play_cards(initial_state)
-    assert length(new_state.hand) == 0
-    assert length(new_state.discard) == length(initial_state.hand)
+
+    assert length(new_state.player_deck.hand) == 0
+    assert length(new_state.player_deck.discard) == length(player_deck.hand)
   end
 
   test "reveal_gimmicks reveals 6 gimmick cards from the gimmick deck" do
-    initial_state = %{ gimmicks: MainEventDraw.create_gimmick_deck, gimmicks_available: [] }
+    gimmick_deck = %{ draw: MainEventDraw.create_gimmick_deck, hand: [] }
+    initial_state = %{ gimmick_deck: gimmick_deck }
     new_state = MainEventDraw.reveal_gimmicks(initial_state)
-    assert length(new_state.gimmicks) == length(initial_state.gimmicks) - 6
-    assert length(new_state.gimmicks_available) == 6
+
+    assert length(new_state.gimmick_deck.draw) == length(gimmick_deck.draw) - 6
+    assert length(new_state.gimmick_deck.hand) == 6
   end
 end

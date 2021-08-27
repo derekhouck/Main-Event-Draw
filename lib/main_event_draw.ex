@@ -7,11 +7,19 @@ defmodule MainEventDraw do
     Acquires gimmicks using `confidence`
   """
   def acquire_gimmicks(current_state) do
-    case Enum.find_index(current_state.gimmicks_available, fn gimmick -> gimmick.confidence_needed < current_state.confidence end) do
+    %{ gimmick_deck: gimmick_deck, player_deck: player_deck } = current_state
+
+    case Enum.find_index(gimmick_deck.hand, fn gimmick -> gimmick.confidence_needed < current_state.confidence end) do
       nil -> current_state
       n when n >= 0 ->
-        {[ selected_gimmick ], gimmicks_available } = draw_card(current_state.gimmicks_available)
-        %{ current_state | gimmicks_available: gimmicks_available, discard: [ selected_gimmick | current_state.discard ], confidence: current_state.confidence - selected_gimmick.confidence_needed }
+        {[ selected_gimmick ], hand } = draw_card(gimmick_deck.hand)
+        updated_gimmick_deck = %{ gimmick_deck | hand: hand }
+
+        %{ current_state | 
+          confidence: current_state.confidence - selected_gimmick.confidence_needed,
+          gimmick_deck: updated_gimmick_deck,
+          player_deck: %{ player_deck | discard: [ selected_gimmick | player_deck.discard ]} 
+        }
     end
   end
 
@@ -29,12 +37,11 @@ defmodule MainEventDraw do
   end
 
   @doc """
-    Checks the current excitement level against the excitement level needed to win the match.
+    Checks the current excitement level against the excitement level needed to win the match. If reached, ends the playing of cards by emptying the hand.
   """
   def check_excitement(current_state) do
     case excitement_level_reached?(current_state.excitement, current_state.excitement_needed) do
       true -> 
-        IO.puts("The match is over! Congratulations!")
         %{ current_state | deck: [], hand: [], discard: Enum.concat([current_state.deck, current_state.hand, current_state.discard])}
       false -> current_state
     end
@@ -110,23 +117,24 @@ defmodule MainEventDraw do
 
   ## Examples
 
-      iex> deck = MainEventDraw.create_starter_deck
-      iex> { hand, _remaining_deck } = MainEventDraw.deal_hand(deck)
+      iex> deck = %{ draw: MainEventDraw.create_starter_deck }
+      iex> { _remaining_deck, hand } = MainEventDraw.deal_hand(deck)
       iex> Enum.count(hand)
       5
 
   """
-  def deal_hand(deck, cards_left_to_draw \\ 5, hand \\ [])
+  def deal_hand(deck, cards_left_to_draw \\ 5, hand \\ []) 
 
   def deal_hand(deck, cards_left_to_draw, hand) when cards_left_to_draw == 0 do
     { deck, hand }
   end
 
   def deal_hand(deck, cards_left_to_draw, hand) do
-    { [ card ], deck } = draw_card(deck)
+    { [ card ], remaining_draw } = draw_card(deck.draw)
     hand = add_card_to_hand(card, hand)
+    updated_deck = %{ deck | draw: remaining_draw }
 
-    deal_hand(deck, cards_left_to_draw - 1, hand) 
+    deal_hand(updated_deck, cards_left_to_draw - 1, hand) 
   end
 
   @doc """
@@ -162,15 +170,17 @@ defmodule MainEventDraw do
   @doc """
     Plays the cards in a player's hand one-by-one, removing them from the player's hand and updating state with their effects.
   """
-  def play_cards(state) when length(state.hand) == 0 do
+  def play_cards(state) when length(state.player_deck.hand) == 0 do
     state
   end
 
   def play_cards(state) do
-    { [ card ], hand } = draw_card(state.hand)
+    %{ player_deck: player_deck } = state
+    { [ card ], hand } = draw_card(player_deck.hand)
     IO.puts("Playing #{card.description}")
+    updated_player_deck = %{ player_deck | discard: [ card | player_deck.discard ], hand: hand }
 
-    %{ state | confidence: state.confidence + card.confidence, excitement: state.excitement + card.excitement, hand: hand, discard: [ card | state.discard ] }
+    %{ state | confidence: state.confidence + card.confidence, excitement: state.excitement + card.excitement, player_deck: updated_player_deck }
     |> check_excitement
     |> play_cards
   end
@@ -179,14 +189,18 @@ defmodule MainEventDraw do
     Puts the current state of the game in the console.
   """
   def report_current_state(state) do
+    %{ gimmick_deck: gimmick_deck, player_deck: player_deck } = state
+
     IO.puts("---")
-    IO.puts("Hand: #{join_card_descriptions(state.hand)}")
-    IO.puts("Deck: #{Enum.count(state.deck)} cards") 
-    IO.puts("Discard: #{Enum.count(state.discard)} cards")
     IO.puts("Excitement: #{state.excitement}")
     IO.puts("Confidence: #{state.confidence}")
-    IO.puts("Gimmicks available: #{join_card_descriptions(state.gimmicks_available)}")
-    IO.puts("Gimmicks deck: #{Enum.count(state.gimmicks)}")
+    IO.puts("Gimmicks deck:")
+    IO.puts("- Available to aquire: #{join_card_descriptions(gimmick_deck.hand)}")
+    IO.puts("- Draw pile: #{Enum.count(gimmick_deck.draw)} cards")
+    IO.puts("Player deck:")
+    IO.puts("- Hand: #{join_card_descriptions(player_deck.hand)}")
+    IO.puts("- Draw pile: #{Enum.count(player_deck.draw)} cards")
+    IO.puts("- Discard pile: #{Enum.count(player_deck.discard)} cards")
     IO.puts("---")
     state
   end
@@ -194,9 +208,12 @@ defmodule MainEventDraw do
   @doc """
     Reveals a number of gimmicks so they can be acquired.
   """
-  def reveal_gimmicks(state) do
-    { gimmicks, gimmicks_available } = deal_hand(state.gimmicks, 6)
-    %{ state | gimmicks: gimmicks, gimmicks_available: gimmicks_available }
+  def reveal_gimmicks(current_state) do
+    %{ gimmick_deck: gimmick_deck } = current_state
+    { updated_gimmick_deck, hand } = deal_hand(gimmick_deck, 6)
+    updated_gimmick_deck = %{ updated_gimmick_deck | hand: hand }
+
+    %{ current_state | gimmick_deck: updated_gimmick_deck }
   end
 
   @doc """
@@ -207,13 +224,17 @@ defmodule MainEventDraw do
 
     %{
       confidence: 0,
-      deck: create_starter_deck(),
-      discard: [],
       excitement: 0,
       excitement_needed: 10,
-      gimmicks: create_gimmick_deck(),
-      gimmicks_available: [],
-      hand: []
+      gimmick_deck: %{
+        draw: create_gimmick_deck(),
+        hand: []
+      },
+      player_deck: %{
+        draw: create_starter_deck(),
+        discard: [],
+        hand: []
+      }
     }
     |> reveal_gimmicks
     |> start_match
@@ -231,17 +252,26 @@ defmodule MainEventDraw do
   @doc """
     Starts a new turn. A new hand is dealt and the cards in the hand are played.
   """
-  def start_turn(state) when length(state.deck) == 0 do
+  def start_turn(state) when length(state.player_deck.draw) == 0 do
     IO.puts("No more cards left to draw.")
     report_current_state(state)
   end
 
-  def start_turn(state) do
-    { deck, hand } = deal_hand(state.deck)
-    %{ state | confidence: 0, deck: deck, hand: hand }
+  def start_turn(current_state) do
+    %{ player_deck: player_deck } = current_state
+    { updated_player_deck, hand } = deal_hand(player_deck)
+    updated_player_deck = %{ updated_player_deck | hand: hand }
+
+    new_state = %{ current_state | confidence: 0, player_deck: updated_player_deck }
     |> report_current_state
     |> play_cards
-    |> acquire_gimmicks
-    |> start_turn
+
+    case excitement_level_reached?(new_state.excitement, new_state.excitement_needed) do
+      true -> IO.puts("The match is over! Congratulations!")
+      false -> 
+        new_state
+        |> acquire_gimmicks
+        |> start_turn
+    end
   end
 end
