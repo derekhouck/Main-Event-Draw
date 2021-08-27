@@ -7,8 +7,12 @@ defmodule MainEventDraw do
     Acquires gimmicks using `confidence`
   """
   def acquire_gimmicks(current_state) do
-    {[ gimmick ], gimmicks_available } = draw_card(current_state.gimmicks_available)
-    %{ current_state | gimmicks_available: gimmicks_available, discard: [ gimmick | current_state.discard ], confidence: current_state.confidence - gimmick.confidence_needed }
+    case Enum.find_index(current_state.gimmicks_available, fn gimmick -> gimmick.confidence_needed < current_state.confidence end) do
+      nil -> current_state
+      n when n >= 0 ->
+        {[ selected_gimmick ], gimmicks_available } = draw_card(current_state.gimmicks_available)
+        %{ current_state | gimmicks_available: gimmicks_available, discard: [ selected_gimmick | current_state.discard ], confidence: current_state.confidence - selected_gimmick.confidence_needed }
+    end
   end
 
   @doc """

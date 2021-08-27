@@ -2,12 +2,20 @@ defmodule MainEventDrawTest do
   use ExUnit.Case
   doctest MainEventDraw
 
-  test "acquire_gimmicks returns state" do
+  test "acquire_gimmicks acquires a gimmick if it has enough confidence" do
     initial_state = %{ gimmicks_available: MainEventDraw.create_gimmick_deck, confidence: 5, discard: [] }
     new_state = MainEventDraw.acquire_gimmicks(initial_state)
     assert length(new_state.gimmicks_available) == length(initial_state.gimmicks_available) - 1
     assert new_state.confidence == initial_state.confidence - 3
     assert length(new_state.discard) == 1
+  end
+
+  test "acquire_gimmicks does not alter state if the player does not have enough confidence" do
+    initial_state = %{ gimmicks_available: MainEventDraw.create_gimmick_deck, confidence: 2, discard: [] }
+    new_state = MainEventDraw.acquire_gimmicks(initial_state)
+    assert length(new_state.gimmicks_available) == length(initial_state.gimmicks_available)
+    assert new_state.confidence == initial_state.confidence
+    assert length(new_state.discard) == 0
   end
 
   test "create_card creates gimmick cards" do
