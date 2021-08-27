@@ -3,8 +3,11 @@ defmodule MainEventDrawTest do
   doctest MainEventDraw
 
   test "acquire_gimmicks returns state" do
-    state = %{ gimmicks: [] }
-    assert MainEventDraw.acquire_gimmicks(state) == state
+    initial_state = %{ gimmicks_available: MainEventDraw.create_gimmick_deck, confidence: 5, discard: [] }
+    new_state = MainEventDraw.acquire_gimmicks(initial_state)
+    assert length(new_state.gimmicks_available) == length(initial_state.gimmicks_available) - 1
+    assert new_state.confidence == initial_state.confidence - 3
+    assert length(new_state.discard) == 1
   end
 
   test "deal_hand deals the correct number of cards" do

@@ -6,8 +6,9 @@ defmodule MainEventDraw do
   @doc """
     Acquires gimmicks using `confidence`
   """
-  def acquire_gimmicks(state) do
-    state
+  def acquire_gimmicks(current_state) do
+    {[ gimmick ], gimmicks_available } = draw_card(current_state.gimmicks_available)
+    %{ current_state | gimmicks_available: gimmicks_available, discard: [ gimmick | current_state.discard ], confidence: current_state.confidence - gimmick.confidence_needed }
   end
 
   @doc """
@@ -171,7 +172,7 @@ defmodule MainEventDraw do
   end
 
   def play_card(state) do
-    { [ card ], hand } = Enum.split(state.hand, 1)
+    { [ card ], hand } = draw_card(state.hand)
     IO.puts("Playing #{card.description}")
 
     %{ state | confidence: state.confidence + 1, hand: hand, discard: [ card | state.discard ] }
@@ -233,6 +234,7 @@ defmodule MainEventDraw do
   """
   def start_turn(state) when length(state.deck) == 0 do
     IO.puts("No more cards left to draw.")
+    report_current_state(state)
   end
 
   def start_turn(state) do
