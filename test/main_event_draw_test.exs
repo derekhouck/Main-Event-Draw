@@ -34,9 +34,9 @@ defmodule MainEventDrawTest do
   end
 
   test "deal_hand deals the correct number of cards" do
-    deck = %{ draw: MainEventDraw.create_starter_deck }
-    { _deck, hand } = MainEventDraw.deal_hand(deck, 4)
-    assert length(hand) == 4
+    deck = %{ draw: MainEventDraw.create_starter_deck, hand: [] }
+    updated_deck = MainEventDraw.deal_hand(deck, 4)
+    assert length(updated_deck.hand) == 4
   end
 
   test "excitement_level_reached returns false is excitment is lower than excitement_needed" do

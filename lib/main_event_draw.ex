@@ -117,24 +117,24 @@ defmodule MainEventDraw do
 
   ## Examples
 
-      iex> deck = %{ draw: MainEventDraw.create_starter_deck }
-      iex> { _remaining_deck, hand } = MainEventDraw.deal_hand(deck)
-      iex> Enum.count(hand)
+      iex> deck = %{ draw: MainEventDraw.create_starter_deck, hand: [] }
+      iex> updated_deck = MainEventDraw.deal_hand(deck)
+      iex> Enum.count(updated_deck.hand)
       5
 
   """
-  def deal_hand(deck, cards_left_to_draw \\ 5, hand \\ []) 
+  def deal_hand(deck, cards_left_to_draw \\ 5) 
 
-  def deal_hand(deck, cards_left_to_draw, hand) when cards_left_to_draw == 0 do
-    { deck, hand }
+  def deal_hand(deck, cards_left_to_draw) when cards_left_to_draw == 0 do
+    deck
   end
 
-  def deal_hand(deck, cards_left_to_draw, hand) do
+  def deal_hand(deck, cards_left_to_draw) do
     { [ card ], remaining_draw } = draw_card(deck.draw)
-    hand = add_card_to_hand(card, hand)
-    updated_deck = %{ deck | draw: remaining_draw }
+    hand = add_card_to_hand(card, deck.hand)
+    updated_deck = %{ deck | draw: remaining_draw, hand: hand }
 
-    deal_hand(updated_deck, cards_left_to_draw - 1, hand) 
+    deal_hand(updated_deck, cards_left_to_draw - 1) 
   end
 
   @doc """
@@ -210,8 +210,7 @@ defmodule MainEventDraw do
   """
   def reveal_gimmicks(current_state) do
     %{ gimmick_deck: gimmick_deck } = current_state
-    { updated_gimmick_deck, hand } = deal_hand(gimmick_deck, 6)
-    updated_gimmick_deck = %{ updated_gimmick_deck | hand: hand }
+    updated_gimmick_deck = deal_hand(gimmick_deck, 6)
 
     %{ current_state | gimmick_deck: updated_gimmick_deck }
   end
@@ -259,8 +258,7 @@ defmodule MainEventDraw do
 
   def start_turn(current_state) do
     %{ player_deck: player_deck } = current_state
-    { updated_player_deck, hand } = deal_hand(player_deck)
-    updated_player_deck = %{ updated_player_deck | hand: hand }
+    updated_player_deck = deal_hand(player_deck)
 
     new_state = %{ current_state | confidence: 0, player_deck: updated_player_deck }
     |> report_current_state
