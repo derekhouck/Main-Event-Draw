@@ -24,15 +24,6 @@ defmodule MainEventDrawTest do
     assert length(new_state.player_deck.discard) == 0
   end
 
-  test "create_card creates gimmick cards" do
-    card = MainEventDraw.create_card(:gimmick)
-    assert card.type == :gimmick
-    assert card.description == "Add 1 to excitement"
-    assert card.confidence == 0
-    assert card.excitement == 1
-    assert card.confidence_needed == 3
-  end
-
   test "deal_hand deals the correct number of cards" do
     deck = %{ draw: MainEventDraw.create_starter_deck, hand: [] }
     updated_deck = MainEventDraw.deal_hand(deck, 4)
@@ -41,13 +32,6 @@ defmodule MainEventDrawTest do
 
   test "excitement_level_reached returns false is excitment is lower than excitement_needed" do
     assert MainEventDraw.excitement_level_reached?(9, 10) == false
-  end
-
-  test "join_card_titles requires a map with a description key" do
-    cards = ["Card One", "Card Two"]
-    assert_raise ArgumentError, fn ->
-      MainEventDraw.join_card_titles(cards)
-    end
   end
 
   test "play_cards empties the player's hand and adds those cards to the discard pile" do
