@@ -286,18 +286,14 @@ defmodule MainEventDraw do
       draw_power: 10,
       excitement: 0,
       excitement_needed: 10,
-      event_deck: %{
-        draw: create_event_deck(),
-        discard: []
+      event_deck: %MainEventDraw.Deck{
+        draw: create_event_deck()
       },
-      gimmick_deck: %{
-        draw: create_gimmick_deck(),
-        hand: []
+      gimmick_deck: %MainEventDraw.Deck{
+        draw: create_gimmick_deck()
       },
-      player_deck: %{
-        draw: create_starter_deck(),
-        discard: [],
-        hand: []
+      player_deck: %MainEventDraw.Deck{
+        draw: create_starter_deck()
       }
     }
     |> reveal_gimmicks
