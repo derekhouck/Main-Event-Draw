@@ -3,18 +3,18 @@ defmodule MainEventDrawTest do
   doctest MainEventDraw
 
   test "acquire_gimmicks acquires a gimmick if it has enough confidence" do
-    gimmick_deck = %{ hand: MainEventDraw.create_gimmick_deck }
+    gimmick_deck = %{ hand: MainEventDraw.create_gimmick_deck, draw: MainEventDraw.create_gimmick_deck }
     player_deck = %{ discard: [] }
     initial_state = %{ confidence: 5, player_deck: player_deck, gimmick_deck: gimmick_deck }
     new_state = MainEventDraw.acquire_gimmicks(initial_state)
 
-    assert length(new_state.gimmick_deck.hand) == length(gimmick_deck.hand) - 1
+    assert length(new_state.gimmick_deck.draw) == length(gimmick_deck.draw) - 1
     assert new_state.confidence == initial_state.confidence - 3
     assert length(new_state.player_deck.discard) == 1
   end
 
   test "acquire_gimmicks does not alter state if the player does not have enough confidence" do
-    gimmick_deck = %{ hand: MainEventDraw.create_gimmick_deck }
+    gimmick_deck = %{ hand: MainEventDraw.create_gimmick_deck, draw: MainEventDraw.create_gimmick_deck }
     player_deck = %{ discard: [] }
     initial_state = %{ confidence: 2, player_deck: player_deck, gimmick_deck: gimmick_deck }
     new_state = MainEventDraw.acquire_gimmicks(initial_state)
@@ -43,10 +43,10 @@ defmodule MainEventDrawTest do
     assert MainEventDraw.excitement_level_reached?(9, 10) == false
   end
 
-  test "join_card_descriptions requires a map with a description key" do
+  test "join_card_titles requires a map with a description key" do
     cards = ["Card One", "Card Two"]
     assert_raise ArgumentError, fn ->
-      MainEventDraw.join_card_descriptions(cards)
+      MainEventDraw.join_card_titles(cards)
     end
   end
 
