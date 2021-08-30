@@ -9,12 +9,17 @@ defmodule MainEventDraw do
   def acquire_gimmicks(current_state) do
     %{ gimmick_deck: gimmick_deck, player_deck: player_deck } = current_state
 
+    IO.puts("Available gimmicks: #{join_card_titles(gimmick_deck.hand)}")
+
     case Enum.find_index(gimmick_deck.hand, fn gimmick -> gimmick.confidence_needed < current_state.confidence end) do
       nil -> current_state
       n when n >= 0 ->
         {[ selected_gimmick ], hand } = draw_card(gimmick_deck.hand)
         updated_gimmick_deck = %{ gimmick_deck | hand: hand }
         |> deal_hand(1)
+
+        IO.puts("Acquiring #{selected_gimmick.title}")
+        IO.puts("End of turn")
 
         %{ current_state | 
           confidence: current_state.confidence - selected_gimmick.confidence_needed,
@@ -56,6 +61,11 @@ defmodule MainEventDraw do
   """
   def create_card(type) do
     case type do
+      :event -> %{
+        type: :event,
+        title: "Botched Spot",
+        description: "Removes 1 from draw power"
+      }
       :gimmick -> %{ 
         type: :gimmick, 
         title: "Signature Move",
@@ -75,6 +85,20 @@ defmodule MainEventDraw do
         confidence_needed: 0 
       }
     end
+  end
+
+  @doc """
+    Creates the shoot event deck.
+
+  ## Examples
+
+      iex> deck = MainEventDraw.create_event_deck
+      iex> Enum.count(deck)
+      20
+
+  """
+  def create_event_deck do
+    Enum.map(0..19, fn _x -> create_card(:event) end)
   end
 
   @doc """
@@ -210,30 +234,13 @@ defmodule MainEventDraw do
         { [ card ], hand } = draw_card(player_deck.hand)
         IO.puts("Playing #{card.title} (#{card.effect})")
         updated_player_deck = %{ player_deck | discard: [ card | player_deck.discard ], hand: hand }
+        updated_confidence = state.confidence + card.confidence
+        updated_excitement = state.excitement + card.excitement
+        IO.puts("Confidence: #{updated_confidence}, Excitement: #{updated_excitement}")
     
-        %{ state | confidence: state.confidence + card.confidence, excitement: state.excitement + card.excitement, player_deck: updated_player_deck }
+        %{ state | confidence: updated_confidence, excitement: updated_excitement, player_deck: updated_player_deck }
         |> play_cards
     end
-  end
-
-  @doc """
-    Puts the current state of the game in the console.
-  """
-  def report_current_state(state) do
-    %{ gimmick_deck: gimmick_deck, player_deck: player_deck } = state
-
-    IO.puts("---")
-    IO.puts("Excitement: #{state.excitement}")
-    IO.puts("Confidence: #{state.confidence}")
-    IO.puts("Gimmicks deck:")
-    IO.puts("- Available to aquire: #{join_card_titles(gimmick_deck.hand)}")
-    IO.puts("- Draw pile: #{Enum.count(gimmick_deck.draw)} cards")
-    IO.puts("Player deck:")
-    IO.puts("- Hand: #{join_card_titles(player_deck.hand)}")
-    IO.puts("- Draw pile: #{Enum.count(player_deck.draw)} cards")
-    IO.puts("- Discard pile: #{Enum.count(player_deck.discard)} cards")
-    IO.puts("---")
-    state
   end
 
   @doc """
@@ -279,6 +286,10 @@ defmodule MainEventDraw do
       draw_power: 10,
       excitement: 0,
       excitement_needed: 10,
+      event_deck: %{
+        draw: create_event_deck(),
+        discard: []
+      },
       gimmick_deck: %{
         draw: create_gimmick_deck(),
         hand: []
@@ -308,9 +319,9 @@ defmodule MainEventDraw do
   def start_turn(current_state) do
     %{ player_deck: player_deck } = current_state
     updated_player_deck = deal_hand(player_deck)
+    IO.puts("New hand: #{join_card_titles(updated_player_deck.hand)}")
 
     new_state = %{ current_state | confidence: 0, player_deck: updated_player_deck }
-    |> report_current_state
     |> reveal_shoot_events
     |> play_cards
 
