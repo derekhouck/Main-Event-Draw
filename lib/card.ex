@@ -1,11 +1,21 @@
 defmodule Card do
+  defstruct [
+    :type,
+    :title,
+    :description,
+    :effect,
+    confidence: 0,
+    excitement: 0,
+    confidence_needed: 0
+  ]
+
   @doc """
   Creates a card based off of the type provided.
   
   ## Examples
 
-      iex> Card.create_card(:starter)
-      %{
+      iex> Card.new(:starter)
+      %Card{
         confidence: 1,
         confidence_needed: 0,
         description: "Add 1 to confidence",
@@ -16,14 +26,14 @@ defmodule Card do
       }
 
   """
-  def create_card(type) do
+  def new(type) do
     case type do
-      :event -> %{
+      :event -> %Card{
         type: :event,
         title: "Botched Spot",
         description: "Removes 1 from draw power"
       }
-      :gimmick -> %{ 
+      :gimmick -> %Card{ 
         type: :gimmick, 
         title: "Signature Move",
         description: "Add 1 to excitement", 
@@ -32,7 +42,7 @@ defmodule Card do
         excitement: 1, 
         confidence_needed: 3 
       }
-      :starter -> %{ 
+      :starter -> %Card{ 
         type: :starter, 
         title: "Basic Spot",
         description: "Add 1 to confidence", 
@@ -45,11 +55,32 @@ defmodule Card do
   end
 
   @doc """
+    Creates cards of a specific type.
+
+  ## Examples
+
+      iex> deck = Card.create_cards(:starter)
+      iex> Enum.count(deck)
+      10
+
+  """
+  def create_cards(type) do
+    case type do
+      :event -> 
+        Enum.map(0..19, fn _x -> Card.new(:event) end)
+      :gimmick ->
+        Enum.map(0..19, fn _x -> Card.new(:gimmick) end)
+      :starter ->
+        Enum.map(0..9, fn _x -> Card.new(:starter) end)
+    end
+  end
+
+  @doc """
     Joins a list of cards together into a comma-separated string.
 
   ## Examples
 
-      iex> deck = MainEventDraw.create_starter_deck
+      iex> deck = Card.create_cards(:starter)
       iex> Card.join_card_titles(deck)
       "Basic Spot, Basic Spot, Basic Spot, Basic Spot, Basic Spot, Basic Spot, Basic Spot, Basic Spot, Basic Spot, Basic Spot"
 

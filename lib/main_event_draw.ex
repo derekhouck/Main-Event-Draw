@@ -6,9 +6,9 @@ defmodule MainEventDraw do
   @doc """
     Acquires gimmicks using `confidence`
   """
-  def acquire_gimmicks(current_state) do
+  def acquire_gimmicks(
     %{ gimmick_deck: gimmick_deck, player_deck: player_deck } = current_state
-
+    ) do
     IO.puts("Available gimmicks: #{Card.join_card_titles(gimmick_deck.hand)}")
 
     case Enum.find_index(gimmick_deck.hand, fn gimmick -> gimmick.confidence_needed < current_state.confidence end) do
@@ -30,69 +30,14 @@ defmodule MainEventDraw do
   end
 
   @doc """
-    Adds a card to the player's hand.
-
-  ## Examples
-
-      iex> MainEventDraw.add_card_to_hand("Example card", [])
-      ["Example card"]
-
-  """
-  def add_card_to_hand(card, hand) do
-    [ card | hand ]
-  end
-
-  @doc """
-    Creates the shoot event deck.
-
-  ## Examples
-
-      iex> deck = MainEventDraw.create_event_deck
-      iex> Enum.count(deck)
-      20
-
-  """
-  def create_event_deck do
-    Enum.map(0..19, fn _x -> Card.create_card(:event) end)
-  end
-
-  @doc """
-    Creates the starting deck of cards for the player.
-
-  ## Examples
-
-      iex> deck = MainEventDraw.create_starter_deck
-      iex> Enum.count(deck)
-      10
-
-  """
-  def create_starter_deck do
-    Enum.map(0..9, fn _x -> Card.create_card(:starter) end)
-  end
-
-  @doc """
-    Creates the gimmick deck of cards that can be acquired using `confidence`.
-  
-  ## Examples
-
-      iex> deck = MainEventDraw.create_gimmick_deck
-      iex> Enum.count(deck)
-      20
-
-  """
-  def create_gimmick_deck do
-    Enum.map(0..19, fn _x -> Card.create_card(:gimmick) end)
-  end
-
-  @doc """
     Draws a card from the deck. Returns a tuple containing two lists: the card drawn and the remainder of the deck.
   
   ## Examples
 
-      iex> deck = MainEventDraw.create_starter_deck
+      iex> deck = Card.create_cards(:starter)
       iex> { [ card ], _remaining_deck } = MainEventDraw.draw_card(deck)
       iex> card
-      %{
+      %Card{
         description: "Add 1 to confidence",
         confidence: 1,
         excitement: 0,
@@ -112,7 +57,7 @@ defmodule MainEventDraw do
 
   ## Examples
 
-      iex> deck = %{ draw: MainEventDraw.create_starter_deck, hand: [] }
+      iex> deck = %{ draw: Card.create_cards(:starter), hand: [] }
       iex> updated_deck = MainEventDraw.deal_hand(deck)
       iex> Enum.count(updated_deck.hand)
       5
@@ -120,14 +65,16 @@ defmodule MainEventDraw do
   """
   def deal_hand(deck, cards_left_to_draw \\ 5) 
 
-  def deal_hand(deck, cards_left_to_draw) when cards_left_to_draw == 0 do
+  def deal_hand(deck, 0) do
     deck
   end
 
-  def deal_hand(deck, cards_left_to_draw) when length(deck.draw) == 0 do
-    case Enum.count(deck.discard) do
+  def deal_hand(
+    %{ discard: discard } = deck, cards_left_to_draw
+    ) when length(deck.draw) == 0 do
+    case Enum.count(discard) do
       n when n > 0 ->
-        %{ deck | draw: Card.shuffle_cards(deck.discard), discard: [] }
+        %{ deck | draw: Card.shuffle_cards(discard), discard: [] }
         |> deal_hand(cards_left_to_draw)
       0 ->
         IO.puts("Deck is empty")
@@ -135,10 +82,9 @@ defmodule MainEventDraw do
     end
   end
   
-  def deal_hand(deck, cards_left_to_draw) do
-    { [ card ], remaining_draw } = draw_card(deck.draw)
-    hand = add_card_to_hand(card, deck.hand)
-    updated_deck = %{ deck | draw: remaining_draw, hand: hand }
+  def deal_hand(%{ draw: draw, hand: hand } = deck, cards_left_to_draw) do
+    { [ card ], remaining_draw } = draw_card(draw)
+    updated_deck = %{ deck | draw: remaining_draw, hand: [ card | hand ]}
 
     deal_hand(updated_deck, cards_left_to_draw - 1) 
   end
@@ -207,19 +153,15 @@ defmodule MainEventDraw do
   def start_game do
     IO.puts("Welcome to MAIN EVENT DRAAAAAAW!")
 
-    %{
-      confidence: 0,
-      draw_power: 10,
-      excitement: 0,
-      excitement_needed: 10,
+    %State{
       event_deck: %MainEventDraw.Deck{
-        draw: create_event_deck()
+        draw: Card.create_cards(:event)
       },
       gimmick_deck: %MainEventDraw.Deck{
-        draw: create_gimmick_deck()
+        draw: Card.create_cards(:gimmick)
       },
       player_deck: %MainEventDraw.Deck{
-        draw: create_starter_deck()
+        draw: Card.create_cards(:starter)
       }
     }
     |> reveal_gimmicks
