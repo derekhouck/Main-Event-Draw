@@ -16,6 +16,34 @@ defmodule Card.Effect do
   end
 
   @doc """
+    Increases confidence by the amount specified.
+
+  ## Examples
+
+      iex> state = %State{ confidence: 1 }
+      iex> new_state = Card.Effect.add_confidence(state, 5)
+      iex> new_state.confidence
+      6
+  """
+  def add_confidence(current_state, amount) do
+    %State{ current_state | confidence: current_state.confidence + amount }
+  end
+
+  @doc """
+    Increases excitement by the amount specified.
+
+  ## Examples
+
+      iex> state = %State{ excitement: 1 }
+      iex> new_state = Card.Effect.add_excitement(state, 5)
+      iex> new_state.excitement
+      6
+  """
+  def add_excitement(current_state, amount) do
+    %State{ current_state | excitement: current_state.excitement + amount }
+  end
+
+  @doc """
     Reduces draw_power by the amount specified.
 
   ## Examples

@@ -4,8 +4,6 @@ defmodule Card do
     :title,
     :description,
     :effect,
-    confidence: 0,
-    excitement: 0,
     confidence_needed: 0
   ]
 
@@ -19,11 +17,9 @@ defmodule Card do
       iex> card
       %Card{
         description: "Add 1 to confidence",
-        confidence: 1,
-        excitement: 0,
         type: :starter,
         confidence_needed: 0,
-        effect: "+1 Confidence",
+        effect: { :add_confidence, 1 },
         title: "Basic Spot"
       }
 
@@ -39,18 +35,23 @@ defmodule Card do
 
       iex> Card.new(:starter)
       %Card{
-        confidence: 1,
         confidence_needed: 0,
         description: "Add 1 to confidence",
-        excitement: 0,
         type: :starter,
-        effect: "+1 Confidence",
+        effect: { :add_confidence, 1 },
         title: "Basic Spot"
       }
 
   """
   def new(type) do
     case type do
+      :chant -> %Card{
+        type: :gimmick,
+        title: "Crowd Chant",
+        description: "The crowd starts chanting for the babyface",
+        effect: { :add_confidence, 2 },
+        confidence_needed: 2
+      }
       :event -> %Card{
         type: :event,
         title: "Botched Spot",
@@ -61,18 +62,14 @@ defmodule Card do
         type: :gimmick, 
         title: "Signature Move",
         description: "Add 1 to excitement", 
-        effect: "+1 Excitement",
-        confidence: 0, 
-        excitement: 1, 
+        effect: { :add_excitement, 1 },
         confidence_needed: 3 
       }
       :starter -> %Card{ 
         type: :starter, 
         title: "Basic Spot",
         description: "Add 1 to confidence", 
-        effect: "+1 Confidence",
-        confidence: 1, 
-        excitement: 0, 
+        effect: { :add_confidence, 1 },
         confidence_needed: 0 
       }
     end
@@ -93,7 +90,9 @@ defmodule Card do
       :event -> 
         Enum.map(0..19, fn _x -> Card.new(:event) end)
       :gimmick ->
-        Enum.map(0..19, fn _x -> Card.new(:gimmick) end)
+        Enum.map(0..14, fn _x -> Card.new(:gimmick) end)
+        ++ Enum.map(0..4, fn _x -> Card.new(:chant) end)
+        |> shuffle_cards
       :starter ->
         Enum.map(0..9, fn _x -> Card.new(:starter) end)
     end
@@ -114,15 +113,16 @@ defmodule Card do
     |> Enum.join(", ")
   end
 
-  @doc """
+  @doc ~S"""
     Shuffles cards.
 
   ## Examples
 
-      iex> cards = ["Card One", "Card Two", "Card Three", "Card Four", "Card Five"]
+      iex> cards = Enum.map(0..5, fn x -> "Card #{x}" end)
       iex> shuffled_cards = Card.shuffle_cards(cards)
       iex> cards == shuffled_cards
       false
+
   """
   def shuffle_cards(cards) do
     Enum.shuffle(cards)

@@ -12,20 +12,22 @@ defmodule MainEventDraw do
     IO.puts("Available gimmicks: #{Card.join_card_titles(gimmick_deck.hand)}")
 
     case Enum.find_index(gimmick_deck.hand, fn gimmick -> gimmick.confidence_needed < current_state.confidence end) do
-      nil -> current_state
+      nil -> 
+        IO.puts("End of turn")
+        current_state
       n when n >= 0 ->
         {[ selected_gimmick ], hand } = Card.draw(gimmick_deck.hand)
         updated_gimmick_deck = %{ gimmick_deck | hand: hand }
         |> deal_hand(1)
 
         IO.puts("Acquiring #{selected_gimmick.title}")
-        IO.puts("End of turn")
 
         %{ current_state | 
           confidence: current_state.confidence - selected_gimmick.confidence_needed,
           gimmick_deck: updated_gimmick_deck,
           player_deck: %{ player_deck | discard: [ selected_gimmick | player_deck.discard ]} 
         }
+        |> acquire_gimmicks
     end
   end
 
@@ -95,13 +97,17 @@ defmodule MainEventDraw do
       true -> state
       false ->
         { [ card ], hand } = Card.draw(player_deck.hand)
-        IO.puts("Playing #{card.title} (#{card.effect})")
+
+        IO.puts("Playing #{card.title} (#{card.description})")
+
         updated_player_deck = %{ player_deck | discard: [ card | player_deck.discard ], hand: hand }
-        updated_confidence = state.confidence + card.confidence
-        updated_excitement = state.excitement + card.excitement
-        IO.puts("Confidence: #{updated_confidence}, Excitement: #{updated_excitement}")
-    
-        %{ state | confidence: updated_confidence, excitement: updated_excitement, player_deck: updated_player_deck }
+
+        new_state = %State{ state | player_deck: updated_player_deck }
+        |> Card.Effect.apply(card.effect)
+
+        IO.puts("Confidence: #{new_state.confidence}, Excitement: #{new_state.excitement}")
+
+        new_state
         |> play_cards
     end
   end

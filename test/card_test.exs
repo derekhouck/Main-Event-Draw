@@ -6,8 +6,7 @@ defmodule CardTest do
     card = Card.new(:gimmick)
     assert card.type == :gimmick
     assert card.description == "Add 1 to excitement"
-    assert card.confidence == 0
-    assert card.excitement == 1
+    assert card.effect == {:add_excitement, 1}
     assert card.confidence_needed == 3
   end
 
