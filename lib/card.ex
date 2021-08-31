@@ -10,6 +10,29 @@ defmodule Card do
   ]
 
   @doc """
+    Draws a card from a set. Returns a tuple containing two lists: the card drawn and the remainder of the set.
+  
+  ## Examples
+
+      iex> set = Card.new_set(:starter)
+      iex> { [ card ], _remaining_set } = Card.draw(set)
+      iex> card
+      %Card{
+        description: "Add 1 to confidence",
+        confidence: 1,
+        excitement: 0,
+        type: :starter,
+        confidence_needed: 0,
+        effect: "+1 Confidence",
+        title: "Basic Spot"
+      }
+
+  """
+  def draw(set) do
+    Enum.split(set, 1)
+  end
+
+  @doc """
   Creates a card based off of the type provided.
   
   ## Examples
@@ -31,7 +54,8 @@ defmodule Card do
       :event -> %Card{
         type: :event,
         title: "Botched Spot",
-        description: "Removes 1 from draw power"
+        description: "Removes 1 from draw power",
+        effect: { :reduce_draw_power, 1 }
       }
       :gimmick -> %Card{ 
         type: :gimmick, 
@@ -55,16 +79,16 @@ defmodule Card do
   end
 
   @doc """
-    Creates cards of a specific type.
+    Creates a set of cards of a specific type.
 
   ## Examples
 
-      iex> deck = Card.create_cards(:starter)
+      iex> deck = Card.new_set(:starter)
       iex> Enum.count(deck)
       10
 
   """
-  def create_cards(type) do
+  def new_set(type) do
     case type do
       :event -> 
         Enum.map(0..19, fn _x -> Card.new(:event) end)
@@ -80,7 +104,7 @@ defmodule Card do
 
   ## Examples
 
-      iex> deck = Card.create_cards(:starter)
+      iex> deck = Card.new_set(:starter)
       iex> Card.join_card_titles(deck)
       "Basic Spot, Basic Spot, Basic Spot, Basic Spot, Basic Spot, Basic Spot, Basic Spot, Basic Spot, Basic Spot, Basic Spot"
 
@@ -95,7 +119,7 @@ defmodule Card do
 
   ## Examples
 
-      iex> cards = ["Card One", "Card Two", "Card Three", "Card Four"]
+      iex> cards = ["Card One", "Card Two", "Card Three", "Card Four", "Card Five"]
       iex> shuffled_cards = Card.shuffle_cards(cards)
       iex> cards == shuffled_cards
       false

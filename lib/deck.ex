@@ -1,3 +1,3 @@
-defmodule MainEventDraw.Deck do
+defmodule Deck do
   defstruct draw: [], discard: [], hand: []
 end

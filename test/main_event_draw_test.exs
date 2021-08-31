@@ -3,7 +3,7 @@ defmodule MainEventDrawTest do
   doctest MainEventDraw
 
   test "acquire_gimmicks acquires a gimmick if it has enough confidence" do
-    gimmick_deck = %{ hand: Card.create_cards(:gimmick), draw: Card.create_cards(:gimmick)}
+    gimmick_deck = %{ hand: Card.new_set(:gimmick), draw: Card.new_set(:gimmick)}
     player_deck = %{ discard: [] }
     initial_state = %{ confidence: 5, player_deck: player_deck, gimmick_deck: gimmick_deck }
     new_state = MainEventDraw.acquire_gimmicks(initial_state)
@@ -14,7 +14,7 @@ defmodule MainEventDrawTest do
   end
 
   test "acquire_gimmicks does not alter state if the player does not have enough confidence" do
-    gimmick_deck = %{ hand: Card.create_cards(:gimmick), draw: Card.create_cards(:gimmick) }
+    gimmick_deck = %{ hand: Card.new_set(:gimmick), draw: Card.new_set(:gimmick) }
     player_deck = %{ discard: [] }
     initial_state = %{ confidence: 2, player_deck: player_deck, gimmick_deck: gimmick_deck }
     new_state = MainEventDraw.acquire_gimmicks(initial_state)
@@ -25,7 +25,7 @@ defmodule MainEventDrawTest do
   end
 
   test "deal_hand deals the correct number of cards" do
-    deck = %{ draw: Card.create_cards(:starter), hand: [] }
+    deck = %{ draw: Card.new_set(:starter), hand: [] }
     updated_deck = MainEventDraw.deal_hand(deck, 4)
     assert length(updated_deck.hand) == 4
   end
@@ -35,7 +35,7 @@ defmodule MainEventDrawTest do
   end
 
   test "play_cards empties the player's hand and adds those cards to the discard pile" do
-    player_deck = %{ discard: [], hand: Card.create_cards(:starter)}
+    player_deck = %{ discard: [], hand: Card.new_set(:starter)}
     initial_state = %{ confidence: 0, excitement: 0, excitement_needed: 10, player_deck: player_deck }
     new_state = MainEventDraw.play_cards(initial_state)
 
@@ -44,7 +44,7 @@ defmodule MainEventDrawTest do
   end
 
   test "reveal_gimmicks reveals 6 gimmick cards from the gimmick deck" do
-    gimmick_deck = %{ draw: Card.create_cards(:gimmick), hand: [] }
+    gimmick_deck = %{ draw: Card.new_set(:gimmick), hand: [] }
     initial_state = %{ gimmick_deck: gimmick_deck }
     new_state = MainEventDraw.reveal_gimmicks(initial_state)
 
