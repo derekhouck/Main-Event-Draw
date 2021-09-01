@@ -8,11 +8,12 @@ defmodule MainEventDraw do
   """
   def acquire_gimmicks(%State{ 
       autorun: autorun, 
+      confidence: confidence,
       gimmick_deck: gimmick_deck, 
       player_deck: player_deck 
       } = current_state) do
 
-    case Enum.find_index(gimmick_deck.hand, fn gimmick -> gimmick.confidence_needed < current_state.confidence end) do
+    case Enum.find_index(gimmick_deck.hand, fn gimmick -> gimmick.confidence_needed <= confidence end) do
       nil -> 
         IO.puts("End of turn")
         current_state
@@ -20,13 +21,16 @@ defmodule MainEventDraw do
         { selected_gimmick, updated_gimmick_deck } = 
           case autorun do
             true -> Deck.acquire_gimmick(gimmick_deck)
-            false -> Deck.select_gimmick(gimmick_deck)
+            false -> 
+              IO.puts("Confidence: #{confidence}")
+              IO.puts("You have enough confidence to acquire a gimmick.")
+              Deck.select_gimmick(gimmick_deck)
           end
 
-        %{ current_state | 
-          confidence: current_state.confidence - selected_gimmick.confidence_needed,
+        %State{ current_state | 
+          confidence: confidence - selected_gimmick.confidence_needed,
           gimmick_deck: updated_gimmick_deck,
-          player_deck: %{ player_deck | discard: [ selected_gimmick | player_deck.discard ]} 
+          player_deck: %Deck{ player_deck | discard: [ selected_gimmick | player_deck.discard ]} 
         }
         |> acquire_gimmicks
     end

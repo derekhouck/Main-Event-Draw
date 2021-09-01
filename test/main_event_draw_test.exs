@@ -14,9 +14,9 @@ defmodule MainEventDrawTest do
   end
 
   test "acquire_gimmicks does not alter state if the player does not have enough confidence" do
-    gimmick_deck = %{ hand: Card.new_set(:gimmick), draw: Card.new_set(:gimmick) }
-    player_deck = %{ discard: [] }
-    initial_state = %State{ confidence: 2, player_deck: player_deck, gimmick_deck: gimmick_deck }
+    gimmick_deck = %Deck{ hand: Card.new_set(:gimmick), draw: Card.new_set(:gimmick) }
+    player_deck = %Deck{ discard: [] }
+    initial_state = %State{ autorun: true, confidence: 1, player_deck: player_deck, gimmick_deck: gimmick_deck }
     new_state = MainEventDraw.acquire_gimmicks(initial_state)
 
     assert length(new_state.gimmick_deck.hand) == length(gimmick_deck.hand)

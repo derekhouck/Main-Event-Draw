@@ -67,9 +67,15 @@ defmodule Deck do
     Displays the available gimmicks to the player and asks them to select one.
   """
   def select_gimmick(deck) do
-    IO.puts("You have enough confidence to acquire a gimmick.")
     Card.display_gimmick_options(deck.hand)
-    IO.gets("Which gimmick would you like to select? ")
-    Deck.acquire_gimmick(deck)
+    IO.gets("Number of gimmick you want: ")
+    |> String.trim
+    |> Integer.parse
+    |> case do
+      {n, _r} when n in 1..6 -> Deck.acquire_gimmick(deck)
+      _ ->
+        IO.puts("That doesn't look right. Only enter the number of the card you want to select.")
+        Deck.select_gimmick(deck)
+    end
   end
 end

@@ -9,7 +9,7 @@ defmodule Card do
 
   def display_gimmick_options(cards) do
     Enum.with_index(cards)
-    |> Enum.each(fn({card, i}) -> IO.puts("#{i + 1}. #{card.title}") end)
+    |> Enum.each(fn({card, i}) -> IO.puts("#{i + 1}. #{card.title} (Cost: #{card.confidence_needed})") end)
   end
 
   @doc """
