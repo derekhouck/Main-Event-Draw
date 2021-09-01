@@ -3,11 +3,26 @@ defmodule State do
     :event_deck,
     :gimmick_deck,
     :player_deck,
+    autorun: false,
     confidence: 0,
     draw_power: 10,
     excitement: 0,
     excitement_needed: 10,
   ]
+
+  @doc """
+    Tests whether autorun is set to a truthy value.
+  
+  ## Example
+  
+      iex> state = %State{ autorun: true }
+      iex> State.autorun?(state)
+      true
+
+  """
+  def autorun?(%State{ autorun: autorun } = current_state) do
+    !!autorun
+  end
 
   @doc """
     Returns true if draw_power is not greater than 0.

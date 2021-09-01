@@ -3,14 +3,14 @@ defmodule MainEventDrawTest do
   doctest MainEventDraw
 
   test "acquire_gimmicks acquires a gimmick if it has enough confidence" do
-    gimmick_deck = %{ hand: Card.new_set(:gimmick), draw: Card.new_set(:gimmick)}
-    player_deck = %{ discard: [] }
+    gimmick_deck = %Deck{ hand: Card.new_set(:gimmick), draw: Card.new_set(:gimmick)}
+    player_deck = %Deck{ discard: [] }
     initial_state = %{ confidence: 5, player_deck: player_deck, gimmick_deck: gimmick_deck }
     new_state = MainEventDraw.acquire_gimmicks(initial_state)
 
-    assert length(new_state.gimmick_deck.draw) == length(gimmick_deck.draw) - 1
-    assert new_state.confidence == initial_state.confidence - 3
-    assert length(new_state.player_deck.discard) == 1
+    assert length(new_state.gimmick_deck.draw) < length(gimmick_deck.draw)
+    assert new_state.confidence < initial_state.confidence
+    assert length(new_state.player_deck.discard) > 0
   end
 
   test "acquire_gimmicks does not alter state if the player does not have enough confidence" do
@@ -25,8 +25,8 @@ defmodule MainEventDrawTest do
   end
 
   test "deal_hand deals the correct number of cards" do
-    deck = %{ draw: Card.new_set(:starter), hand: [] }
-    updated_deck = MainEventDraw.deal_hand(deck, 4)
+    deck = %Deck{ draw: Card.new_set(:starter), hand: [] }
+    updated_deck = Deck.deal_hand(deck, 4)
     assert length(updated_deck.hand) == 4
   end
 
@@ -44,7 +44,7 @@ defmodule MainEventDrawTest do
   end
 
   test "reveal_gimmicks reveals 6 gimmick cards from the gimmick deck" do
-    gimmick_deck = %{ draw: Card.new_set(:gimmick), hand: [] }
+    gimmick_deck = %Deck{ draw: Card.new_set(:gimmick), hand: [] }
     initial_state = %{ gimmick_deck: gimmick_deck }
     new_state = MainEventDraw.reveal_gimmicks(initial_state)
 

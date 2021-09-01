@@ -18,7 +18,7 @@ defmodule MainEventDraw do
       n when n >= 0 ->
         {[ selected_gimmick ], hand } = Card.draw(gimmick_deck.hand)
         updated_gimmick_deck = %{ gimmick_deck | hand: hand }
-        |> deal_hand(1)
+        |> Deck.deal_hand(1)
 
         IO.puts("Acquiring #{selected_gimmick.title}")
 
@@ -29,43 +29,6 @@ defmodule MainEventDraw do
         }
         |> acquire_gimmicks
     end
-  end
-
-  @doc """
-    Deals a hand of cards to the player from the deck.
-
-  ## Examples
-
-      iex> deck = %{ draw: Card.new_set(:starter), hand: [] }
-      iex> updated_deck = MainEventDraw.deal_hand(deck)
-      iex> Enum.count(updated_deck.hand)
-      5
-
-  """
-  def deal_hand(deck, cards_left_to_draw \\ 5) 
-
-  def deal_hand(deck, 0) do
-    deck
-  end
-
-  def deal_hand(
-    %{ discard: discard } = deck, cards_left_to_draw
-    ) when length(deck.draw) == 0 do
-    case Enum.count(discard) do
-      n when n > 0 ->
-        %{ deck | draw: Card.shuffle_cards(discard), discard: [] }
-        |> deal_hand(cards_left_to_draw)
-      0 ->
-        IO.puts("Deck is empty")
-        deck
-    end
-  end
-  
-  def deal_hand(%{ draw: draw, hand: hand } = deck, cards_left_to_draw) do
-    { [ card ], remaining_draw } = Card.draw(draw)
-    updated_deck = %{ deck | draw: remaining_draw, hand: [ card | hand ]}
-
-    deal_hand(updated_deck, cards_left_to_draw - 1) 
   end
 
   @doc """
@@ -117,7 +80,7 @@ defmodule MainEventDraw do
   """
   def reveal_gimmicks(current_state) do
     %{ gimmick_deck: gimmick_deck } = current_state
-    updated_gimmick_deck = deal_hand(gimmick_deck, 6)
+    updated_gimmick_deck = Deck.deal_hand(gimmick_deck, 6)
 
     %{ current_state | gimmick_deck: updated_gimmick_deck }
   end
@@ -141,10 +104,11 @@ defmodule MainEventDraw do
   @doc """
     Starts a game of Main Event Draw from its inital state.
   """
-  def start_game do
+  def start_game(autorun \\ false) do
     IO.puts("Welcome to MAIN EVENT DRAAAAAAW!")
 
     %State{
+      autorun: autorun,
       event_deck: %Deck{
         draw: Card.new_set(:event)
       },
@@ -173,7 +137,7 @@ defmodule MainEventDraw do
   """
   def start_turn(current_state) do
     %{ player_deck: player_deck } = current_state
-    updated_player_deck = deal_hand(player_deck)
+    updated_player_deck = Deck.deal_hand(player_deck)
     IO.puts("New hand: #{Card.join_card_titles(updated_player_deck.hand)}")
 
     after_events_state = %{ current_state | confidence: 0, player_deck: updated_player_deck }
