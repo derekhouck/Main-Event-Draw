@@ -6,21 +6,22 @@ defmodule MainEventDraw do
   @doc """
     Acquires gimmicks using `confidence`
   """
-  def acquire_gimmicks(
-    %{ gimmick_deck: gimmick_deck, player_deck: player_deck } = current_state
-    ) do
-    IO.puts("Available gimmicks: #{Card.join_card_titles(gimmick_deck.hand)}")
+  def acquire_gimmicks(%State{ 
+      autorun: autorun, 
+      gimmick_deck: gimmick_deck, 
+      player_deck: player_deck 
+      } = current_state) do
 
     case Enum.find_index(gimmick_deck.hand, fn gimmick -> gimmick.confidence_needed < current_state.confidence end) do
       nil -> 
         IO.puts("End of turn")
         current_state
       n when n >= 0 ->
-        {[ selected_gimmick ], hand } = Card.draw(gimmick_deck.hand)
-        updated_gimmick_deck = %{ gimmick_deck | hand: hand }
-        |> Deck.deal_hand(1)
-
-        IO.puts("Acquiring #{selected_gimmick.title}")
+        { selected_gimmick, updated_gimmick_deck } = 
+          case autorun do
+            true -> Deck.acquire_gimmick(gimmick_deck)
+            false -> Deck.select_gimmick(gimmick_deck)
+          end
 
         %{ current_state | 
           confidence: current_state.confidence - selected_gimmick.confidence_needed,
@@ -32,31 +33,16 @@ defmodule MainEventDraw do
   end
 
   @doc """
-    Returns true if `excitement` is greater than or equal to `excitement_needed`.
-  
-  ## Examples
-
-      iex> excitement = 11
-      iex> excitement_needed = 10
-      iex> MainEventDraw.excitement_level_reached?(excitement, excitement_needed)
-      true
-
-  """
-  def excitement_level_reached?(excitement, excitement_needed) do
-    excitement >= excitement_needed
-  end
-
-  @doc """
     Plays the cards in a player's hand one-by-one, removing them from the player's hand and updating state with their effects.
   """
   def play_cards(state) when length(state.player_deck.hand) == 0 do
     state   
   end
 
-  def play_cards(state) do
-    %{ player_deck: player_deck } = state
-
-    case excitement_level_reached?(state.excitement, state.excitement_needed) do
+  def play_cards(%State{ player_deck: player_deck } = state) do
+    state
+    |> State.excitement_level_reached?
+    |> case do
       true -> state
       false ->
         { [ card ], hand } = Card.draw(player_deck.hand)
@@ -148,7 +134,7 @@ defmodule MainEventDraw do
       false ->
         new_state = play_cards(after_events_state)
 
-        case excitement_level_reached?(new_state.excitement, new_state.excitement_needed) do
+        case State.excitement_level_reached?(new_state) do
           true -> IO.puts("The match is over! Congratulations!")
           false -> 
             new_state

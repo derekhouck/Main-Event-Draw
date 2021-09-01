@@ -2,6 +2,31 @@ defmodule Deck do
   defstruct draw: [], discard: [], hand: []
 
   @doc """
+    Acquires a gimmick from the hand/pool and refills the pool. Returns a tuple of the selected gimmick and the updated gimmick deck.
+  
+  ## Examples
+
+      iex> deck = %Deck{ draw: Card.new_set(:gimmick) }
+      iex> |> Deck.deal_hand(6)
+      iex> {gimmick, remaining_deck} = Deck.acquire_gimmick(deck)
+      iex> Enum.count(remaining_deck.draw) == Enum.count(deck.draw) - 1
+      true
+      iex> gimmick.type
+      :gimmick
+
+  """
+  def acquire_gimmick(%Deck{ hand: hand } = deck) do
+    {[ selected_gimmick ], remaining_hand } = Card.draw(hand)
+
+    updated_deck = %Deck{ deck | hand: remaining_hand }
+    |> Deck.deal_hand(1)
+
+    IO.puts("Acquiring #{selected_gimmick.title}")    
+
+    { selected_gimmick, updated_deck }
+  end
+
+  @doc """
     Deals a hand of cards to the player from the deck.
 
   ## Examples
@@ -36,5 +61,15 @@ defmodule Deck do
     updated_deck = %Deck{ deck | draw: remaining_draw, hand: [ card | hand ]}
 
     deal_hand(updated_deck, cards_left_to_draw - 1) 
+  end
+
+  @doc """
+    Displays the available gimmicks to the player and asks them to select one.
+  """
+  def select_gimmick(deck) do
+    IO.puts("You have enough confidence to acquire a gimmick.")
+    Card.display_gimmick_options(deck.hand)
+    IO.gets("Which gimmick would you like to select? ")
+    Deck.acquire_gimmick(deck)
   end
 end

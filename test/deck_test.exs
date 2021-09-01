@@ -1,4 +1,4 @@
 defmodule DeckTest do
   use ExUnit.Case
-  doctest MainEventDraw
+  doctest Deck
 end

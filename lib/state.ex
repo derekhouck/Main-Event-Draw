@@ -20,7 +20,7 @@ defmodule State do
       true
 
   """
-  def autorun?(%State{ autorun: autorun } = current_state) do
+  def autorun?(%State{ autorun: autorun }) do
     !!autorun
   end
 
@@ -36,5 +36,19 @@ defmodule State do
   """
   def draw_power_depleted?(draw_power) do
     draw_power <= 0
+  end
+
+  @doc """
+    Returns true if `excitement` is greater than or equal to `excitement_needed`.
+  
+  ## Examples
+
+      iex> state = %State{ excitement: 11, excitement_needed: 10 }
+      iex> State.excitement_level_reached?(state)
+      true
+
+  """
+  def excitement_level_reached?(%State{ excitement: excitement, excitement_needed: excitement_needed }) do
+    excitement >= excitement_needed
   end
 end

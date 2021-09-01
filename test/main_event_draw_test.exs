@@ -5,7 +5,7 @@ defmodule MainEventDrawTest do
   test "acquire_gimmicks acquires a gimmick if it has enough confidence" do
     gimmick_deck = %Deck{ hand: Card.new_set(:gimmick), draw: Card.new_set(:gimmick)}
     player_deck = %Deck{ discard: [] }
-    initial_state = %{ confidence: 5, player_deck: player_deck, gimmick_deck: gimmick_deck }
+    initial_state = %State{ autorun: true, confidence: 5, player_deck: player_deck, gimmick_deck: gimmick_deck }
     new_state = MainEventDraw.acquire_gimmicks(initial_state)
 
     assert length(new_state.gimmick_deck.draw) < length(gimmick_deck.draw)
@@ -16,7 +16,7 @@ defmodule MainEventDrawTest do
   test "acquire_gimmicks does not alter state if the player does not have enough confidence" do
     gimmick_deck = %{ hand: Card.new_set(:gimmick), draw: Card.new_set(:gimmick) }
     player_deck = %{ discard: [] }
-    initial_state = %{ confidence: 2, player_deck: player_deck, gimmick_deck: gimmick_deck }
+    initial_state = %State{ confidence: 2, player_deck: player_deck, gimmick_deck: gimmick_deck }
     new_state = MainEventDraw.acquire_gimmicks(initial_state)
 
     assert length(new_state.gimmick_deck.hand) == length(gimmick_deck.hand)
@@ -28,10 +28,6 @@ defmodule MainEventDrawTest do
     deck = %Deck{ draw: Card.new_set(:starter), hand: [] }
     updated_deck = Deck.deal_hand(deck, 4)
     assert length(updated_deck.hand) == 4
-  end
-
-  test "excitement_level_reached returns false is excitment is lower than excitement_needed" do
-    assert MainEventDraw.excitement_level_reached?(9, 10) == false
   end
 
   test "play_cards empties the player's hand and adds those cards to the discard pile" do
