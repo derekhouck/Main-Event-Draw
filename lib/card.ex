@@ -124,7 +124,7 @@ defmodule Card do
       :gimmick
 
   """
-  def select(set, index) do
+  def select(set, index \\ 0) do
     List.pop_at(set, index)
   end
 

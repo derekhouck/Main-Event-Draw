@@ -22,7 +22,7 @@ defmodule MainEventDraw do
           case autorun do
             true -> Deck.acquire_gimmick(gimmick_deck, n)
             false -> 
-              IO.puts("Confidence: #{confidence}")
+              IO.puts("Current Confidence: #{confidence}")
               IO.puts("You have enough confidence to acquire a gimmick.")
               State.select_gimmick(current_state)
           end
@@ -37,6 +37,23 @@ defmodule MainEventDraw do
   end
 
   @doc """
+    Takes an input, parses it, and returns an integer.
+  """
+  def get_number_from_input(message) do
+    parsed_input = IO.gets(message)
+    |> String.trim
+    |>Integer.parse
+
+    if parsed_input == :error do
+      IO.puts("That doesn't look right. Enter only a number.")
+      get_number_from_input(message)
+    else
+      {integer, _remainder} = parsed_input
+      integer
+    end
+  end
+
+  @doc """
     Plays the cards in a player's hand one-by-one, removing them from the player's hand and updating state with their effects.
   """
   def play_cards(%State{ autorun: autorun, player_deck: player_deck } = current_state) do
@@ -45,21 +62,11 @@ defmodule MainEventDraw do
     else
       %Deck{ hand: hand } = player_deck
 
-      { [ card ], remaining_hand } = 
+      { card, remaining_hand } = 
         if autorun do
-          Card.draw(hand)
+          Card.select(hand)
         else
-          Deck.display_hand(player_deck)
-          IO.gets("Number of card to play: ")
-          |> String.trim
-          |> Integer.parse
-          |> case do
-            {n, _r} when n in 1..5 ->
-              Card.draw(hand)
-            _ ->
-              IO.puts("That doesn't look right. Only enter the number of the card you want to select.")
-              Card.draw(hand)
-          end
+          Deck.select_from_hand(player_deck)
         end
 
       IO.puts("Playing #{card.title} (#{card.description})")

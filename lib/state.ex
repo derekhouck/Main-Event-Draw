@@ -57,11 +57,9 @@ defmodule State do
   """
   def select_gimmick(%State{ confidence: confidence, gimmick_deck: deck } = current_state) do
     Deck.display_hand(deck, true)
-    IO.gets("Number of gimmick you want: ")
-    |> String.trim
-    |> Integer.parse
+    MainEventDraw.get_number_from_input("Number of gimmick you want: ")
     |> case do
-      {n, _r} when n in 1..6 -> 
+      n when n in 1..6 -> 
         index = n - 1
         card = Enum.at(deck.hand, index)
         
@@ -69,6 +67,7 @@ defmodule State do
           true -> Deck.acquire_gimmick(deck, index)
           false -> 
             IO.puts("That card requires more confidence than you have. Please select another cards with less confidence needed.")
+            IO.puts("Confidence remaining: #{confidence}")
             select_gimmick(current_state)
         end
       _ ->

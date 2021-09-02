@@ -66,11 +66,13 @@ defmodule Deck do
   def display_hand(%Deck{hand: hand}, cost_included \\ false) do
     cards = Enum.with_index(hand)
 
-    if cost_included do
-      Enum.each(cards, fn({card, i}) -> IO.puts("#{i + 1}. #{card.title} (Cost: #{card.confidence_needed})") end)
-    else
-      Enum.each(cards, fn({card, i}) -> IO.puts("#{i + 1}. #{card.title}") end) 
-    end
+    Enum.each(cards, fn({card, i}) ->
+      IO.puts("#{i + 1}. #{card.title}")
+      IO.puts("   #{card.description}")
+      if cost_included do
+        IO.puts("   Confidence needed: #{card.confidence_needed}")
+      end
+    end)
   end
 
   @doc """
@@ -89,5 +91,17 @@ defmodule Deck do
   """
   def empty_hand?(deck) do
     length(deck.hand) == 0
+  end
+
+  def select_from_hand(%Deck{ hand: hand } = deck) do
+    display_hand(deck)
+    MainEventDraw.get_number_from_input("Number of card to play: ")
+    |> case do
+      n when n in 1..length(hand) ->
+        Card.select(hand, n - 1)
+      _ ->
+        IO.puts("Only enter a number corresponding to a card in your hand.")
+        select_from_hand(deck)
+    end
   end
 end
