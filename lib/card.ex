@@ -7,11 +7,6 @@ defmodule Card do
     confidence_needed: 0
   ]
 
-  def display_gimmick_options(cards) do
-    Enum.with_index(cards)
-    |> Enum.each(fn({card, i}) -> IO.puts("#{i + 1}. #{card.title} (Cost: #{card.confidence_needed})") end)
-  end
-
   @doc """
     Draws a card from a set. Returns a tuple containing two lists: the card drawn and the remainder of the set.
   

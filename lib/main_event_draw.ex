@@ -20,11 +20,11 @@ defmodule MainEventDraw do
       n when n >= 0 ->
         { selected_gimmick, updated_gimmick_deck } = 
           case autorun do
-            true -> Deck.acquire_gimmick(gimmick_deck)
+            true -> Deck.acquire_gimmick(gimmick_deck, n)
             false -> 
               IO.puts("Confidence: #{confidence}")
               IO.puts("You have enough confidence to acquire a gimmick.")
-              Deck.select_gimmick(current_state)
+              State.select_gimmick(current_state)
           end
 
         %State{ current_state | 
@@ -39,29 +39,40 @@ defmodule MainEventDraw do
   @doc """
     Plays the cards in a player's hand one-by-one, removing them from the player's hand and updating state with their effects.
   """
-  def play_cards(state) when length(state.player_deck.hand) == 0 do
-    state   
-  end
+  def play_cards(%State{ autorun: autorun, player_deck: player_deck } = current_state) do
+    if State.excitement_level_reached?(current_state) or Deck.empty_hand?(player_deck) do
+      current_state
+    else
+      %Deck{ hand: hand } = player_deck
 
-  def play_cards(%State{ player_deck: player_deck } = state) do
-    state
-    |> State.excitement_level_reached?
-    |> case do
-      true -> state
-      false ->
-        { [ card ], hand } = Card.draw(player_deck.hand)
+      { [ card ], remaining_hand } = 
+        if autorun do
+          Card.draw(hand)
+        else
+          Deck.display_hand(player_deck)
+          IO.gets("Number of card to play: ")
+          |> String.trim
+          |> Integer.parse
+          |> case do
+            {n, _r} when n in 1..5 ->
+              Card.draw(hand)
+            _ ->
+              IO.puts("That doesn't look right. Only enter the number of the card you want to select.")
+              Card.draw(hand)
+          end
+        end
 
-        IO.puts("Playing #{card.title} (#{card.description})")
+      IO.puts("Playing #{card.title} (#{card.description})")
 
-        updated_player_deck = %{ player_deck | discard: [ card | player_deck.discard ], hand: hand }
+      updated_player_deck = %Deck{ player_deck | discard: [ card | player_deck.discard ], hand: remaining_hand }
 
-        new_state = %State{ state | player_deck: updated_player_deck }
-        |> Card.Effect.apply(card.effect)
+      new_state = %State{ current_state | player_deck: updated_player_deck }
+      |> Card.Effect.apply(card.effect)
 
-        IO.puts("Confidence: #{new_state.confidence}, Excitement: #{new_state.excitement}")
+      IO.puts("Confidence: #{new_state.confidence}, Excitement: #{new_state.excitement}")
 
-        new_state
-        |> play_cards
+      new_state
+      |> play_cards
     end
   end
 

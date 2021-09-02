@@ -51,4 +51,29 @@ defmodule State do
   def excitement_level_reached?(%State{ excitement: excitement, excitement_needed: excitement_needed }) do
     excitement >= excitement_needed
   end
+
+  @doc """
+    Displays the available gimmicks to the player and asks them to select one.
+  """
+  def select_gimmick(%State{ confidence: confidence, gimmick_deck: deck } = current_state) do
+    Deck.display_hand(deck, true)
+    IO.gets("Number of gimmick you want: ")
+    |> String.trim
+    |> Integer.parse
+    |> case do
+      {n, _r} when n in 1..6 -> 
+        index = n - 1
+        card = Enum.at(deck.hand, index)
+        
+        case card.confidence_needed <= confidence do
+          true -> Deck.acquire_gimmick(deck, index)
+          false -> 
+            IO.puts("That card requires more confidence than you have. Please select another cards with less confidence needed.")
+            select_gimmick(current_state)
+        end
+      _ ->
+        IO.puts("That doesn't look right. Only enter the number of the card you want to select.")
+        select_gimmick(current_state)
+    end
+  end
 end

@@ -63,28 +63,31 @@ defmodule Deck do
     deal_hand(updated_deck, cards_left_to_draw - 1) 
   end
 
-  @doc """
-    Displays the available gimmicks to the player and asks them to select one.
-  """
-  def select_gimmick(%State{ confidence: confidence, gimmick_deck: deck } = current_state) do
-    Card.display_gimmick_options(deck.hand)
-    IO.gets("Number of gimmick you want: ")
-    |> String.trim
-    |> Integer.parse
-    |> case do
-      {n, _r} when n in 1..6 -> 
-        index = n - 1
-        card = Enum.at(deck.hand, index)
-        
-        case card.confidence_needed <= confidence do
-          true -> Deck.acquire_gimmick(deck, index)
-          false -> 
-            IO.puts("That card requires more confidence than you have. Please select another cards with less confidence needed.")
-            Deck.select_gimmick(current_state)
-        end
-      _ ->
-        IO.puts("That doesn't look right. Only enter the number of the card you want to select.")
-        Deck.select_gimmick(current_state)
+  def display_hand(%Deck{hand: hand}, cost_included \\ false) do
+    cards = Enum.with_index(hand)
+
+    if cost_included do
+      Enum.each(cards, fn({card, i}) -> IO.puts("#{i + 1}. #{card.title} (Cost: #{card.confidence_needed})") end)
+    else
+      Enum.each(cards, fn({card, i}) -> IO.puts("#{i + 1}. #{card.title}") end) 
     end
+  end
+
+  @doc """
+    Returns true is a deck's hand is empty.
+
+  ## Examples
+
+      iex> deck = %Deck{ hand: [] }
+      iex> Deck.empty_hand?(deck)
+      true
+
+      iex> deck_with_hand = %Deck{ hand: Card.new_set(:starter) }
+      iex> Deck.empty_hand?(deck_with_hand)
+      false
+
+  """
+  def empty_hand?(deck) do
+    length(deck.hand) == 0
   end
 end
