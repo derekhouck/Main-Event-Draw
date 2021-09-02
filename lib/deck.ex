@@ -66,16 +66,25 @@ defmodule Deck do
   @doc """
     Displays the available gimmicks to the player and asks them to select one.
   """
-  def select_gimmick(deck) do
+  def select_gimmick(%State{ confidence: confidence, gimmick_deck: deck } = current_state) do
     Card.display_gimmick_options(deck.hand)
     IO.gets("Number of gimmick you want: ")
     |> String.trim
     |> Integer.parse
     |> case do
-      {n, _r} when n in 1..6 -> Deck.acquire_gimmick(deck, n - 1)
+      {n, _r} when n in 1..6 -> 
+        index = n - 1
+        card = Enum.at(deck.hand, index)
+        
+        case card.confidence_needed <= confidence do
+          true -> Deck.acquire_gimmick(deck, index)
+          false -> 
+            IO.puts("That card requires more confidence than you have. Please select another cards with less confidence needed.")
+            Deck.select_gimmick(current_state)
+        end
       _ ->
         IO.puts("That doesn't look right. Only enter the number of the card you want to select.")
-        Deck.select_gimmick(deck)
+        Deck.select_gimmick(current_state)
     end
   end
 end

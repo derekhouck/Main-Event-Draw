@@ -24,7 +24,7 @@ defmodule MainEventDraw do
             false -> 
               IO.puts("Confidence: #{confidence}")
               IO.puts("You have enough confidence to acquire a gimmick.")
-              Deck.select_gimmick(gimmick_deck)
+              Deck.select_gimmick(current_state)
           end
 
         %State{ current_state | 
