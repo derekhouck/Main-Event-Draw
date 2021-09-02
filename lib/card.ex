@@ -118,6 +118,21 @@ defmodule Card do
     |> Enum.join(", ")
   end
 
+  @doc """
+    Selects a card from a set. Returns a tuple containing two lists: the card drawn and the remainder of the set.
+  
+  ## Examples
+
+      iex> set = [Card.new(:starter), Card.new(:gimmick), Card.new(:event)]
+      iex> { card, _remaining_set } = Card.select(set, 1)
+      iex> card.type
+      :gimmick
+
+  """
+  def select(set, index) do
+    List.pop_at(set, index)
+  end
+
   @doc ~S"""
     Shuffles cards.
 

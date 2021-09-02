@@ -15,8 +15,8 @@ defmodule Deck do
       :gimmick
 
   """
-  def acquire_gimmick(%Deck{ hand: hand } = deck) do
-    {[ selected_gimmick ], remaining_hand } = Card.draw(hand)
+  def acquire_gimmick(%Deck{ hand: hand } = deck, card_index \\ 0) do
+    {selected_gimmick, remaining_hand } = Card.select(hand, card_index)
 
     updated_deck = %Deck{ deck | hand: remaining_hand }
     |> Deck.deal_hand(1)
@@ -72,7 +72,7 @@ defmodule Deck do
     |> String.trim
     |> Integer.parse
     |> case do
-      {n, _r} when n in 1..6 -> Deck.acquire_gimmick(deck)
+      {n, _r} when n in 1..6 -> Deck.acquire_gimmick(deck, n - 1)
       _ ->
         IO.puts("That doesn't look right. Only enter the number of the card you want to select.")
         Deck.select_gimmick(deck)
