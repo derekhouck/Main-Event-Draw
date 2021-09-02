@@ -112,11 +112,13 @@ defmodule MainEventDraw do
   @doc """
     Starts a game of Main Event Draw from its inital state.
   """
-  def start_game(autorun \\ false) do
+  def main(args \\ []) do
     IO.puts("Welcome to MAIN EVENT DRAAAAAAW!")
 
+    opts = parse_args(args)
+
     %State{
-      autorun: autorun,
+      autorun: (if opts[:autorun], do: opts[:autorun], else: false),
       event_deck: %Deck{
         draw: Card.new_set(:event)
       },
@@ -129,6 +131,14 @@ defmodule MainEventDraw do
     }
     |> reveal_gimmicks
     |> start_match
+  end
+
+  defp parse_args(args) do
+    { parsed, _args, _invalid }= args
+    |> OptionParser.parse(strict: [autorun: :boolean])
+
+    IO.puts(inspect parsed)
+    parsed
   end
 
   @doc """
